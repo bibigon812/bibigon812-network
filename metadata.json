@@ -1,0 +1,32 @@
+{
+  "name": "bibigon812-network",
+  "version": "0.1.0",
+  "author": "Dmitriy Yakovlev",
+  "summary": "Puppet module for network management in Linux",
+  "license": "Apache-2.0",
+  "source": "https://github.com/bibigon812/bibigon812-network",
+  "project_page": "https://github.com/bibigon812/bibigon812-network",
+  "issues_url": "https://github.com/bibigon812/bibigon812-network/issues",
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": ">= 4.10.0 < 5.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+          "7"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+          "7"
+      ]
+    }
+  ],
+  "data_provider": null
+}
+

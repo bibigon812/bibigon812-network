@@ -1,0 +1,10 @@
+/.idea/
+/.git/
+/.bundle/
+/.ruby-version
+/vendor/
+/junit/
+/.vagrant/
+/log/
+/spec/fixtures/
+/pkg/
