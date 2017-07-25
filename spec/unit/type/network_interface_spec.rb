@@ -45,12 +45,12 @@ describe described_type do
         expect { described_class.new(name: 'foo', ensure: :present) }.to_not raise_error
       end
 
-      it 'should support :enable' do
-        expect { described_class.new(name: 'foo', ensure: :enable) }.to_not raise_error
+      it 'should support :enabled' do
+        expect { described_class.new(name: 'foo', ensure: :enabled) }.to_not raise_error
       end
 
-      it 'should support :disable' do
-        expect { described_class.new(name: 'foo', ensure: :disable) }.to_not raise_error
+      it 'should support :disabled' do
+        expect { described_class.new(name: 'foo', ensure: :disabled) }.to_not raise_error
       end
     end
 
@@ -69,6 +69,28 @@ describe described_type do
 
       it 'should contain 10.0.0.1' do
         expect(described_class.new(name: 'foo', ipaddress: '10.0.0.1/24')[:ipaddress]).to eq(['10.0.0.1/24'])
+      end
+    end
+
+    describe 'mac' do
+      it 'should support 00:00:00:00:00:00 as a value' do
+        expect { described_class.new(name: 'foo', mac: '00:00:00:00:00:00') }.to_not raise_error
+      end
+
+      it 'should support 00-00-00-00-00-00 as a value' do
+        expect { described_class.new(name: 'foo', mac: '00-00-00-00-00-00') }.to_not raise_error
+      end
+
+      it 'should support 000000000000 as a value' do
+        expect { described_class.new(name: 'foo', mac: '000000000000') }.to_not raise_error
+      end
+
+      it 'should not support G00000000000 as a value' do
+        expect { described_class.new(name: 'foo', mac: 'G00000000000') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support \'\' as a value' do
+        expect { described_class.new(name: 'foo', mac: '') }.to raise_error Puppet::Error, /Invalid value/
       end
     end
   end
