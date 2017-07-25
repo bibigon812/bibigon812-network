@@ -2,17 +2,21 @@ Puppet::Type.newtype(:network_interface) do
   @doc = 'This type provides the capabilities to manage network interface paramaters'
 
   ensurable do
-    defaultvalues
+    newvalue(:absent) do
+      provider.destroy
+    end
 
-    newvalue(:disable, event: :interface_disabled) do
+    newvalue(:disabled, event: :interface_disabled) do
       provider.disable
     end
 
-    newvalue(:enable, event: :interface_enabled) do
+    newvalue(:enabled, event: :interface_enabled) do
       provider.enable
     end
 
-    defaultto { :present }
+    aliasvalue(:present, :enabled)
+
+    defaultto { :enabled }
 
     def retrieve
       provider.state
