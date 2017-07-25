@@ -39,4 +39,10 @@ Puppet::Type.newtype(:network_interface) do
       fail 'Invalid value \'%{value}\'. Prefix length is not specified.' unless value.include?('/')
     end
   end
+
+  newproperty(:mac) do
+    desc 'MAC'
+
+    newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
+  end
 end
