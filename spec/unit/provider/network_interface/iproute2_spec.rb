@@ -42,7 +42,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     it 'should return the resource eth0' do
       expect(described_class.instances[0].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :enable,
+            ensure: :enabled,
             ipaddress: %w{127.0.0.1/8 10.255.0.1/32 192.168.0.1/32},
             mtu: 65536,
             name: 'lo',
@@ -54,8 +54,9 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     it 'should return the resource eth0' do
       expect(described_class.instances[1].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :enable,
+            ensure: :enabled,
             ipaddress: %w{10.0.2.15/24},
+            mac: '08:00:27:1d:5a:fb',
             mtu: 1500,
             name: 'eth0',
             provider: :iproute2,
@@ -66,8 +67,9 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     it 'should return the resource eth0' do
       expect(described_class.instances[2].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :enable,
+            ensure: :enabled,
             ipaddress: %w{172.16.32.103/24},
+            mac: '08:00:27:9c:76:49',
             mtu: 1500,
             name: 'eth1',
             provider: :iproute2,
@@ -78,7 +80,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     it 'should return the resource eth0' do
       expect(described_class.instances[3].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :disable,
+            ensure: :disabled,
             ipaddress: [],
             mtu: 1500,
             name: 'ip_vti0',
