@@ -129,5 +129,31 @@ describe described_type do
         expect { described_class.new(name: 'foo', mtu: 1) }.to raise_error Puppet::Error, /Invalid value/
       end
     end
+
+    describe 'vlanid' do
+      it 'should support 100 as a value' do
+        expect { described_class.new(name: 'vlan100', vlanid: 100) }.to_not raise_error
+      end
+
+      it 'should support 100 as a value' do
+        expect { described_class.new(name: 'eth0.100', vlanid: 100) }.to_not raise_error
+      end
+
+      it 'should support 100 as a value' do
+        expect { described_class.new(name: 'bond0.100', vlanid: 100) }.to_not raise_error
+      end
+
+      it 'should not support \'100\' as a value' do
+        expect { described_class.new(name: 'bond0.100', vlanid: '100') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 4096 as a value' do
+        expect { described_class.new(name: 'eth0.100', vlanid: 4096) }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 0 as a value' do
+        expect { described_class.new(name: 'foo', vlanid: 100) }.to raise_error Puppet::Error, /Invalid value/
+      end
+    end
   end
 end

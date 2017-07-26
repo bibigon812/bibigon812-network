@@ -56,17 +56,35 @@ Puppet::Type.newtype(:network_interface) do
   end
 
   newproperty(:mac) do
-    desc 'MAC'
+    desc 'MAC address.'
 
     newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
   end
 
   newproperty(:mtu) do
-    desc 'MTU'
+    desc 'Maximum transmission unit.'
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
       fail 'Invalid value \'%{value}\'. Valid values are 1500-9000.' % { value: value } unless value >= 1500 and value <= 9000
+    end
+  end
+
+  newproperty(:vlanid) do
+    desc 'Vlan ID.'
+
+    validate do |value|
+      type = if resource[:name].include?('.') or resource[:name].include?('vlan')
+               :vlan
+             elsif resource[:name].include?('bond')
+               :bond
+             else
+               :eth
+             end
+
+      fail 'Invalid value \'%{value}\'. This interface type does not support vlanid.' % { value: value } unless type == :vlan
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 1-4095.' % { value: value } unless value >= 1 and value <= 4095
     end
   end
 end
