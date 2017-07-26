@@ -72,6 +72,82 @@ describe described_type do
       end
     end
 
+    describe 'bond_lacp_rate' do
+      it 'should contain :slow' do
+        expect(described_class.new(name: 'bond0')[:bond_lacp_rate]).to eq(:slow)
+      end
+
+      it 'should support fast as a value' do
+        expect { described_class.new(name: 'bond0', bond_lacp_rate: 'fast') }.to_not raise_error
+      end
+
+      it 'should support slow as a value' do
+        expect { described_class.new(name: 'bond0', bond_lacp_rate: :slow) }.to_not raise_error
+      end
+
+      it 'should contain fast' do
+        expect(described_class.new(name: 'bond0', bond_lacp_rate: 'fast')[:bond_lacp_rate]).to eq(:fast)
+      end
+    end
+
+    describe 'bond_miimon' do
+      it 'should support 1500 as a value' do
+        expect { described_class.new(name: 'bond0', bond_miimon: 100) }.to_not raise_error
+      end
+
+      it 'should not support \'1500\' as a value' do
+        expect { described_class.new(name: 'bond0', bond_miimon: '100') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 10000 as a value' do
+        expect { described_class.new(name: 'bond0', bond_miimon: 10000) }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 1 as a value' do
+        expect { described_class.new(name: 'bond0', bond_miimon: -1) }.to raise_error Puppet::Error, /Invalid value/
+      end
+    end
+
+    describe 'bond_mode' do
+      it 'should contain layer2' do
+        expect(described_class.new(name: 'bond0')[:bond_mode]).to eq(:'802.3ad')
+      end
+
+      it 'should not support balance-pzd as a value' do
+        expect { described_class.new(name: 'bond0', bond_mode: 'balance-pzd') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      %w{balance-rr active-backup balance-xor broadcast 802.3ad balance-tlb balance-alb}.each do |mode|
+        it "should support #{mode} as a value" do
+          expect { described_class.new(name: 'bond0', bond_mode: mode) }.to_not raise_error
+        end
+
+        it "should contain #{mode}" do
+          expect(described_class.new(name: 'bond0', bond_mode: mode)[:bond_mode]).to eq(:"#{mode}")
+        end
+      end
+    end
+
+    describe 'bond_xmit_hash_policy' do
+      it 'should contain slow' do
+        expect(described_class.new(name: 'bond0')[:bond_xmit_hash_policy]).to eq(:'layer3+4')
+      end
+
+      it 'should not support layer5 as a value' do
+        expect { described_class.new(name: 'bond0', bond_xmit_hash_policy: 'slayer5') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      %w{layer2 layer3+4}.each do |xmit_hash_policy|
+        it "should support #{xmit_hash_policy} as a value" do
+          expect { described_class.new(name: 'bond0', bond_xmit_hash_policy: xmit_hash_policy) }.to_not raise_error
+        end
+
+        it "should contain #{xmit_hash_policy}" do
+          expect(described_class.new(name: 'bond0', bond_xmit_hash_policy: xmit_hash_policy)[:bond_xmit_hash_policy]).to eq(:"#{xmit_hash_policy}")
+        end
+      end
+    end
+
     describe 'ipaddress' do
       it 'should support 10.0.0.1/24 as a value' do
         expect { described_class.new(name: 'foo', ipaddress: '10.0.0.1/24') }.to_not raise_error
@@ -133,6 +209,10 @@ describe described_type do
     describe 'parent' do
       it 'should support foo as value' do
         expect { described_class.new(name: 'foo', parent: 'foo') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should support eth0 as value' do
+        expect { described_class.new(name: 'vlan100', parent: 'eth0') }.to_not  raise_error
       end
     end
 

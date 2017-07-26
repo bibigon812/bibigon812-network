@@ -45,6 +45,38 @@ Puppet::Type.newtype(:network_interface) do
     }
   end
 
+  newproperty(:bond_lacp_rate) do
+    desc %q{Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode.}
+
+    newvalues(:slow, :fast)
+    defaultto { :slow }
+  end
+
+  newproperty(:bond_miimon) do
+    desc 'Specifies the MII link monitoring frequency in milliseconds.'
+
+    defaultto { 100 }
+
+    validate do |value|
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 0-1000.' % { value: value } unless value >= 0 and value <= 1000
+    end
+  end
+
+  newproperty(:bond_mode) do
+    desc 'Specifies one of the bonding policies.'
+
+    newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
+    defaultto { '802.3ad' }
+  end
+
+  newproperty(:bond_xmit_hash_policy) do
+    desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
+
+    newvalues('layer2', 'layer3+4')
+    defaultto { 'layer3+4' }
+  end
+
   newproperty(:ipaddress, array_matching: :all) do
     desc 'IP addresses'
 
@@ -93,7 +125,6 @@ Puppet::Type.newtype(:network_interface) do
              end
 
       fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :eth
-      fail 'Invalid value \'%{value}\'.' % { value: value } unless value == resource[:name].split('.').first
     end
   end
 
