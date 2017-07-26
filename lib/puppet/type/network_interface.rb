@@ -97,8 +97,22 @@ Puppet::Type.newtype(:network_interface) do
     end
   end
 
-  newproperty(:vlanid) do
+  newproperty(:tag) do
     desc 'Vlan ID.'
+
+    defaultto {
+      begin
+        if resource[:name].include?('.')
+          Integer(resource[:name].split('.').last)
+        elsif resource[:name].include?('vlan')
+          Integer(resource[:name].sub(/\Avlan/, ''))
+        else
+          nil
+        end
+      rescue
+        nil
+      end
+    }
 
     validate do |value|
       type = if resource[:name].include?('.') or resource[:name].include?('vlan')
@@ -109,7 +123,7 @@ Puppet::Type.newtype(:network_interface) do
                :eth
              end
 
-      fail 'Invalid value \'%{value}\'. This interface type does not support vlanid.' % { value: value } unless type == :vlan
+      fail 'Invalid value \'%{value}\'. This interface type does not support tagging.' % { value: value } unless type == :vlan
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
       fail 'Invalid value \'%{value}\'. Valid values are 1-4095.' % { value: value } unless value >= 1 and value <= 4095
     end
