@@ -130,6 +130,12 @@ describe described_type do
       end
     end
 
+    describe 'parent' do
+      it 'should support foo as value' do
+        expect { described_class.new(name: 'foo', parent: 'foo') }.to raise_error Puppet::Error, /Invalid value/
+      end
+    end
+
     describe 'vlanid' do
       it 'should support 100 as a value' do
         expect { described_class.new(name: 'vlan100', vlanid: 100) }.to_not raise_error

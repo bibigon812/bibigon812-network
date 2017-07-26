@@ -25,6 +25,9 @@ Puppet::Type.newtype(:network_interface) do
 
   newparam(:name, namevar: true) do
     desc 'Interface name.'
+    newvalues(/\Abond\d+(\.\d+)?\Z/)
+    newvalues(/\Avlan\d+\Z/)
+    newvalues(/\A[[:alpha:]]+\w+(\.\d+)?\Z/)
   end
 
   newparam(:type) do
@@ -67,6 +70,30 @@ Puppet::Type.newtype(:network_interface) do
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
       fail 'Invalid value \'%{value}\'. Valid values are 1500-9000.' % { value: value } unless value >= 1500 and value <= 9000
+    end
+  end
+
+  newproperty(:parent) do
+    desc 'Parent interface.'
+    defaultto {
+      if resource[:name].include?('.')
+        resource[:name].split('.').first
+      else
+        nil
+      end
+    }
+
+    validate do |value|
+      type = if resource[:name].include?('.') or resource[:name].include?('vlan')
+               :vlan
+             elsif resource[:name].include?('bond')
+               :bond
+             else
+               :eth
+             end
+
+      fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :eth
+      fail 'Invalid value \'%{value}\'.' % { value: value } unless value == resource[:name].split('.').first
     end
   end
 
