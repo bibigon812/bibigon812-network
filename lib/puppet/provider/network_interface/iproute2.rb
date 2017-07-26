@@ -2,7 +2,9 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   @doc = 'Manages network interface parameters'
 
   confine exists: '/usr/sbin/ip'
-  commands ip: 'ip'
+
+  commands cat: 'cat', echo: 'echo', ip: 'ip', modprobe: 'modprobe'
+
 
   @resource_map = {
       ipaddress: {
@@ -24,7 +26,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     ip('addr').split(/\n/).collect do |line|
       # Find a new interface
       if /\A\d+:\s(\S+):\s<[A-Z,_]+>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
-        name = $1
+        name_and_parent = $1
         mtu = Integer($2)
         state = case $4
                   when 'UNKNOWN', 'UP'
@@ -34,6 +36,16 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
                   else
                     :absent
                 end
+
+        name, parent = name_and_parent.split('@')
+
+        type = if name.include?('.') or name.include?('vlan')
+                 :vlan
+               elsif name.include?('bond')
+                 :bond
+               else
+                 :eth
+               end
 
         # Add hash to providers
         unless hash.empty?
@@ -46,7 +58,17 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
             mtu: mtu,
             name: name.split(/@/).first,
             provider: self.name,
+            type: type,
         }
+
+        if type == :bond
+          hash[:bond_lacp_rate] = cat("/sys/class/net/#{name}/bonding/lacp_rate").split(/\s/).first
+          hash[:bond_miimon] = Integer(cat("/sys/class/net/#{name}/bonding/miimon"))
+          hash[:bond_mode] = cat("/sys/class/net/#{name}/bonding/mode").split(/\s/).first
+          hash[:bond_xmit_hash_policy] = cat("/sys/class/net/#{name}/bonding/xmit_hash_policy").split(/\s/).first
+        end
+
+        hash[:parent] = parent unless parent.nil? or parent == 'NONE'
 
         # Add default values
         @resource_map.each do |property, options|
@@ -105,6 +127,18 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
   def create
     debug 'Enabling the %{name} interface' % { name: @resource[:mtu] }
+
+    if @resource[:type] == :vlan
+      ip(['link', 'add', 'name', @resource[:name], 'link', @resource[:parent], 'type', 'vlan', 'id', @resource[:tag].to_s])
+    elsif @resource[:type] == :bond
+      modprobe([
+                   'bonding',
+                   "mode=#{@resource[:bond_mode]}",
+                   "miimon=#{@resource[:bond_miimon]}",
+                   "lacp_rate=#{@resource[:bond_lacp_rate]}",
+                   "xmit_hash_policy=#{@resource[:bind_xmit_hash_policy]}",
+               ])
+    end
 
     @resource[:ipaddress].each do |ipaddress|
       ip(['addr', 'add', ipaddress, 'dev', @resource[:name]])
