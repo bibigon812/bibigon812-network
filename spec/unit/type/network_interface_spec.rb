@@ -93,5 +93,23 @@ describe described_type do
         expect { described_class.new(name: 'foo', mac: '') }.to raise_error Puppet::Error, /Invalid value/
       end
     end
+
+    describe 'mtu' do
+      it 'should support 1500 as a value' do
+        expect { described_class.new(name: 'foo', mtu: 1500) }.to_not raise_error
+      end
+
+      it 'should not support \'1500\' as a value' do
+        expect { described_class.new(name: 'foo', mtu: '1500') }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 10000 as a value' do
+        expect { described_class.new(name: 'foo', mtu: 10000) }.to raise_error Puppet::Error, /Invalid value/
+      end
+
+      it 'should not support 1 as a value' do
+        expect { described_class.new(name: 'foo', mtu: 1) }.to raise_error Puppet::Error, /Invalid value/
+      end
+    end
   end
 end

@@ -45,4 +45,13 @@ Puppet::Type.newtype(:network_interface) do
 
     newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
   end
+
+  newproperty(:mtu) do
+    desc 'MTU'
+
+    validate do |value|
+      fail "Invalid value '#{value}'. Valid value is an Integer" unless value.is_a?(Integer)
+      fail "Invalid value '#{value}'. Valid values are 1500-9000" unless value >= 1500 and value <= 9000
+    end
+  end
 end
