@@ -54,6 +54,24 @@ describe described_type do
       end
     end
 
+    describe 'type' do
+      it 'should contain :ethernet' do
+        expect(described_class.new(name: 'eth1')[:type]).to eq(:eth)
+      end
+
+      it 'should contain :bonding' do
+        expect(described_class.new(name: 'bond0')[:type]).to eq(:bond)
+      end
+
+      it 'should contain :vlan' do
+        expect(described_class.new(name: 'bond0.100')[:type]).to eq(:vlan)
+      end
+
+      it 'should contain :vlan' do
+        expect(described_class.new(name: 'vlan100')[:type]).to eq(:vlan)
+      end
+    end
+
     describe 'ipaddress' do
       it 'should support 10.0.0.1/24 as a value' do
         expect { described_class.new(name: 'foo', ipaddress: '10.0.0.1/24') }.to_not raise_error

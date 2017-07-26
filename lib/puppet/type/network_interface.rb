@@ -11,7 +11,7 @@ Puppet::Type.newtype(:network_interface) do
     end
 
     newvalue(:enabled, event: :interface_enabled) do
-      provider.enable
+      provider.create
     end
 
     aliasvalue(:present, :enabled)
@@ -27,6 +27,21 @@ Puppet::Type.newtype(:network_interface) do
     desc 'Interface name.'
   end
 
+  newparam(:type) do
+    desc 'Type of this interface.'
+
+    newvalues(:eth, :bond, :vlan)
+    defaultto {
+      if resource[:name].include?('.') or resource[:name].include?('vlan')
+        :vlan
+      elsif resource[:name].include?('bond')
+        :bond
+      else
+        :eth
+      end
+    }
+  end
+
   newproperty(:ipaddress, array_matching: :all) do
     desc 'IP addresses'
 
@@ -34,9 +49,9 @@ Puppet::Type.newtype(:network_interface) do
       begin
         IPAddr.new value
       rescue
-        fail 'Invalid value \'%{value}\'. It is not a IP address' % { value: value }
+        fail 'Invalid value \'%{value}\'. It is not a IP address.' % { value: value }
       end
-      fail 'Invalid value \'%{value}\'. Prefix length is not specified.' unless value.include?('/')
+      fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value } unless value.include?('/')
     end
   end
 
@@ -50,8 +65,8 @@ Puppet::Type.newtype(:network_interface) do
     desc 'MTU'
 
     validate do |value|
-      fail "Invalid value '#{value}'. Valid value is an Integer" unless value.is_a?(Integer)
-      fail "Invalid value '#{value}'. Valid values are 1500-9000" unless value >= 1500 and value <= 9000
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 1500-9000.' % { value: value } unless value >= 1500 and value <= 9000
     end
   end
 end
