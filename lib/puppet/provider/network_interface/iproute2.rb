@@ -92,4 +92,14 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     providers
   end
+
+  def self.prefetch(resources)
+    debug 'Prefetch resources'
+    providers = instances
+    resources.keys.each do |name|
+      if provider = providers.find{ |provider| provider.name == name }
+        resources[name].provider = provider
+      end
+    end
+  end
 end

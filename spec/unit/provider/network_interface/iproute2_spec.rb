@@ -7,9 +7,9 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     end
   end
 
-  context 'ip addr output' do
-    before :each do
-      described_class.expects(:ip).with('addr').returns '1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN
+  let(:output) do
+    <<-EOS
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
        valid_lft forever preferred_lft forever
@@ -32,7 +32,13 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     inet6 fe80::a00:27ff:fe9c:7649/64 scope link
        valid_lft forever preferred_lft forever
 4: ip_vti0@NONE: <NOARP> mtu 1500 qdisc noop state DOWN
-    link/ipip 0.0.0.0 brd 0.0.0.0'
+    link/ipip 0.0.0.0 brd 0.0.0.0
+EOS
+  end
+
+  context 'ip addr output' do
+    before :each do
+      described_class.expects(:ip).with('addr').returns output
     end
 
     it 'should return resources' do
@@ -87,6 +93,39 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
             provider: :iproute2,
         }
       )
+    end
+  end
+
+  let(:provider) do
+    described_class.new(
+        ensure: :enabled,
+        ipaddress: %w{172.16.32.108/24},
+        mtu: 1500,
+        name: 'eth1',
+        provider: :iproute2,
+    )
+  end
+
+  let(:resource) do
+    Puppet::Type.type(:network_interface).new(
+        :name    => 'eth1',
+    )
+  end
+
+  describe 'prefetch' do
+    let(:resources) do
+      {
+          eth1: resource
+      }
+    end
+
+    before :each do
+      described_class.stubs(:ip).with('addr').returns output
+    end
+
+    it 'should find provider for resource' do
+      described_class.prefetch(resources)
+      expect(resources.values.first.provider.name).to eq('eth1')
     end
   end
 end
