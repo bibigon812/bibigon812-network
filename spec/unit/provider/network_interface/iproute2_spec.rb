@@ -108,7 +108,7 @@ EOS
 
   let(:resource) do
     Puppet::Type.type(:network_interface).new(
-        :name    => 'eth1',
+        name: 'eth1',
     )
   end
 
@@ -128,4 +128,26 @@ EOS
       expect(resources.values.first.provider.name).to eq('eth1')
     end
   end
+
+
+  describe '#create' do
+    before :each do
+      provider.stubs(:exists?).returns(false)
+    end
+
+    it 'should set up properties and up the interface' do
+      resource.provider = provider
+      resource[:ipaddress] = %w{10.255.255.1/24 172.31.255.1/24}
+      resource[:mac] = '01:23:45:67:89:ab'
+      resource[:mtu] = 1500
+      provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev eth1})
+      provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev eth1})
+      provider.expects(:ip).with(%w{link set dev eth1 mtu 1500})
+      provider.expects(:ip).with(%w{link set dev eth1 address 01:23:45:67:89:ab})
+      provider.expects(:ip).with(%w{link set dev eth1 up})
+      provider.create
+    end
+  end
+
+  describe '#destroy'
 end

@@ -102,4 +102,16 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       end
     end
   end
+
+  def create
+    debug 'Enabling the %{name} interface' % { name: @resource[:mtu] }
+
+    @resource[:ipaddress].each do |ipaddress|
+      ip(['addr', 'add', ipaddress, 'dev', @resource[:name]])
+    end
+
+    ip(['link', 'set', 'dev', @resource[:name], 'mtu', @resource[:mtu].to_s])
+    ip(['link', 'set', 'dev', @resource[:name], 'address', @resource[:mac]])
+    ip(['link', 'set', 'dev', @resource[:name], 'up'])
+  end
 end
