@@ -55,16 +55,71 @@ basic use of the module.
 
 ## Usage
 
-This section is where you describe how to customize, configure, and do the
-fancy stuff with your module here. It's especially helpful if you include usage
-examples and code samples for doing things with your module.
+```puppet
+network_interface { ['eth0', 'eth1']:
+    mtu => 9000,
+}
+```
+
+```puppet
+network_interface { 'bond0':
+    ensure         => present,
+    bond_lacp_rate => 'fast',
+    mtu            => 9000,
+}
+```
+
+### Create vlan interface
+```puppet
+network_interface { 'bond0.100':
+    ensure => present,
+    ipaddress => [
+        '10.0.0.1/24',
+        '172.16.0.1/24',
+    ],
+}
+```
+
+```puppet
+network_interface { 'vlan100':
+    ensure => present,
+    ipaddress => [
+        '10.0.0.1/24',
+        '172.16.0.1/24',
+    ],
+    parent => 'bond0',
+}
+```
+
+```puppet
+network_interface { 'super_vlan':
+    ensure => present,
+    ipaddress => [
+        '10.0.0.1/24',
+        '172.16.0.1/24',
+    ],
+    parent => 'bond0',
+    tag    => 100,
+}
+```
 
 ## Reference
 
-Here, include a complete list of your module's classes, types, providers,
-facts, along with the parameters for each. Users refer to this section (thus
-the name "Reference") to find specific details; most users don't read it per
-se.
+### network_interface
+
+- `name`. Interface name.
+- `type`. Interface type. Can be `hw`, `bond` and `vlan`.
+- `bond_lacp_rate`. Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode. Default to `slow`.
+- `bond_miimon`. Specifies the MII link monitoring frequency in milliseconds. Default to `100`.
+- `bond_mode`. Specifies one of the bonding policies. Default to `802.3ad`.
+- `bond_slaves`. Specifies a list of the bonding slaves. Default to `[]`.
+- `bond_xmit_hash_policy`. This policy uses upper layer protocol information, when available, to generate the hash. Default to `layer3+4`.
+- `ipaddress`. Specifies a list of IP addresses. Default to `[]`.
+- `mac`. Specifies a MAC address.
+- `mtu`. Specifies the maximum transmission unit. Default to `1500`.
+- `parent`. Specifies a parent interface.
+- `state`. State of this interface. Can be `up` and `down`. Default to `up`.
+- `tag`. Vlan ID.
 
 ## Limitations
 
