@@ -13,23 +13,19 @@ Puppet::Type.newtype(:network_interface) do
     newvalues(/\A[[:alpha:]]+\w+(\.\d+)?\Z/)
   end
 
-  newparam(:state) do
-    desc 'State of this interface.'
-    newvalues(:up, :down, :unknown)
-    defaultto { resource[:name] == 'lo' ? :unknown : :up }
-  end
-
   newparam(:type) do
     desc 'Type of this interface.'
 
-    newvalues(:eth, :bond, :vlan)
+    newvalues(:bond, :hw, :loopback, :vlan)
     defaultto {
-      if resource[:name].include?('.') or resource[:name].include?('vlan')
+      if resource[:name] == 'lo'
+        :loopback
+      elsif resource[:name].include?('.') or resource[:name].include?('vlan')
         :vlan
       elsif resource[:name].include?('bond')
         :bond
       else
-        :eth
+        :hw
       end
     }
   end
@@ -72,7 +68,7 @@ Puppet::Type.newtype(:network_interface) do
   end
 
   newproperty(:ipaddress, array_matching: :all) do
-    desc 'IP addresses'
+    desc 'Specifies a list of IP addresses.'
 
     validate do |value|
       begin
@@ -85,13 +81,14 @@ Puppet::Type.newtype(:network_interface) do
   end
 
   newproperty(:mac) do
-    desc 'MAC address.'
+    desc 'Specifies a MAC address.'
 
     newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
   end
 
   newproperty(:mtu) do
-    desc 'Maximum transmission unit.'
+    desc 'Specifies the maximum transmission unit.'
+    defaultto 1500
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
@@ -100,7 +97,7 @@ Puppet::Type.newtype(:network_interface) do
   end
 
   newproperty(:parent) do
-    desc 'Parent interface.'
+    desc 'Specifies a parent interface.'
     defaultto {
       if resource[:name].include?('.')
         resource[:name].split('.').first
@@ -121,6 +118,12 @@ Puppet::Type.newtype(:network_interface) do
 
       fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :eth
     end
+  end
+
+  newproperty(:state) do
+    desc 'State of this interface.'
+    newvalues(:up, :down, :unknown)
+    defaultto { resource[:name] == 'lo' ? :unknown : :up }
   end
 
   newproperty(:tag) do
@@ -154,5 +157,14 @@ Puppet::Type.newtype(:network_interface) do
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
       fail 'Invalid value \'%{value}\'. Valid values are 1-4095.' % { value: value } unless value >= 1 and value <= 4095
     end
+  end
+
+  autorequire(:network_interface) do
+    reqs = []
+
+    reqs += self[:bond_slaves] if self[:type]
+    reqs << self[:parent] if self[:parent]
+
+    reqs
   end
 end

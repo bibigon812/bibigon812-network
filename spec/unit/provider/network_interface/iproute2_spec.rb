@@ -42,7 +42,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
 EOS
   end
 
-  context 'ip addr output' do
+  context 'ip address output' do
     before :each do
       described_class.expects(:ip).with('addr').returns output
       File.stubs(:read).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
@@ -64,7 +64,7 @@ EOS
               name:      'lo',
               provider:  :iproute2,
               state:     :unknown,
-              type:      :eth,
+              type:      :hw,
           }
       )
     end
@@ -79,7 +79,7 @@ EOS
               name:      'eth0',
               provider:  :iproute2,
               state:     :up,
-              type:      :eth,
+              type:      :hw,
           }
       )
     end
@@ -94,7 +94,7 @@ EOS
             name:      'eth1',
             provider:  :iproute2,
             state:     :up,
-            type:      :eth,
+            type:      :hw,
         }
       )
     end
@@ -108,7 +108,7 @@ EOS
             name:      'ip_vti0',
             provider:  :iproute2,
             state:     :down,
-            type:      :eth,
+            type:      :hw,
         }
       )
     end
@@ -119,6 +119,7 @@ EOS
             bond_lacp_rate:        'slow',
             bond_miimon:           100,
             bond_mode:             '802.3ad',
+            bond_slaves:           [],
             bond_xmit_hash_policy: 'layer3+4',
             ensure:                :present,
             ipaddress:             [],
@@ -153,7 +154,7 @@ EOS
   let(:provider) do
     described_class.new(
         ensure:    :enabled,
-        ipaddress: %w{172.16.32.108/24},
+        ipaddress: [],
         mtu:       1500,
         name:      'eth1',
         provider:  :iproute2,
@@ -204,11 +205,6 @@ EOS
       end
       it 'with all params' do
         resource.provider = provider
-        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev eth1})
-        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev eth1})
-        provider.expects(:ip).with(%w{link set dev eth1 mtu 1500})
-        provider.expects(:ip).with(%w{link set dev eth1 address 01:23:45:67:89:ab})
-        provider.expects(:ip).with(%w{link set dev eth1 up})
         provider.create
       end
     end
@@ -227,8 +223,8 @@ EOS
       it 'with all params' do
         resource.provider = provider
         provider.expects(:ip).with(%w{link add name vlan100 link eth0 type vlan id 100})
-        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev vlan100})
-        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev vlan100})
+        provider.expects(:ip).with(%w{address add 10.255.255.1/24 dev vlan100})
+        provider.expects(:ip).with(%w{address add 172.31.255.1/24 dev vlan100})
         provider.expects(:ip).with(%w{link set dev vlan100 mtu 1500})
         provider.expects(:ip).with(%w{link set dev vlan100 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev vlan100 up})
@@ -248,6 +244,8 @@ EOS
       end
 
       before :each do
+        File.expects(:directory?).with('/sys/class/net/bond0/bonding').returns true
+        File.expects(:directory?).with('/sys/class/net/eth0').returns true
         File.expects(:read).with('/sys/class/net/eth0/operstate').returns 'up'
         provider.expects(:ip).with(%w{link set dev eth0 down})
         provider.expects(:ip).with(%w{link set dev eth0 up})
@@ -264,8 +262,9 @@ EOS
         provider.expects(:modprobe).with(%w{bonding})
         File.expects(:read).with('/sys/class/net/bonding_masters').returns 'bond0'
         File.expects(:write).with('/sys/class/net/bonding_masters', '-bond0').returns 6
-        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev bond0})
-        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev bond0})
+        File.expects(:write).with('/sys/class/net/bonding_masters', '+bond0').returns 6
+        provider.expects(:ip).with(%w{address add 10.255.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{address add 172.31.255.1/24 dev bond0})
         provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
         provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev bond0 up})
@@ -275,8 +274,9 @@ EOS
       it 'with bonding driver' do
         resource.provider = provider
         File.expects(:exists?).with('/sys/class/net/bonding_masters').returns true
-        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev bond0})
-        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev bond0})
+        File.expects(:write).with('/sys/class/net/bonding_masters', '+bond0').returns 6
+        provider.expects(:ip).with(%w{address add 10.255.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{address add 172.31.255.1/24 dev bond0})
         provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
         provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev bond0 up})

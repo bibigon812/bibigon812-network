@@ -56,7 +56,7 @@ describe described_type do
 
     describe 'type' do
       it 'should contain :ethernet' do
-        expect(described_class.new(name: 'eth1')[:type]).to eq(:eth)
+        expect(described_class.new(name: 'eth1')[:type]).to eq(:hw)
       end
 
       it 'should contain :bonding' do
@@ -70,22 +70,26 @@ describe described_type do
       it 'should contain :vlan' do
         expect(described_class.new(name: 'vlan100')[:type]).to eq(:vlan)
       end
+
+      it 'should contain :loopback' do
+        expect(described_class.new(name: 'lo')[:type]).to eq(:loopback)
+      end
     end
 
     describe 'state' do
-      it 'should contain :ethernet' do
+      it 'should contain :up' do
         expect(described_class.new(name: 'eth1')[:state]).to eq(:up)
       end
 
-      it 'should contain :bonding' do
+      it 'should contain :up' do
         expect(described_class.new(name: 'bond0')[:state]).to eq(:up)
       end
 
-      it 'should contain :vlan' do
+      it 'should contain :up' do
         expect(described_class.new(name: 'bond0.100')[:state]).to eq(:up)
       end
 
-      it 'should contain :vlan' do
+      it 'should contain :unknown' do
         expect(described_class.new(name: 'lo')[:state]).to eq(:unknown)
       end
     end
@@ -270,6 +274,29 @@ describe described_type do
       it 'should contain 100' do
         expect(described_class.new(name: 'vlan100')[:tag]).to eq(100)
       end
+    end
+  end
+
+  describe 'when autorequiring' do
+    let(:catalog) { Puppet::Resource::Catalog.new }
+
+    it 'should require bond0' do
+      vlan = described_class.new(name: 'bond0.100')
+      bond = described_class.new(name: 'bond0', bond_slaves: %w{eth0})
+      eth  = described_class.new(name: 'eth0')
+      catalog.add_resource vlan
+      catalog.add_resource bond
+      catalog.add_resource eth
+      vlan_reqs = vlan.autorequire
+      bond_reqs = bond.autorequire
+
+      expect(vlan_reqs.size).to eq(1)
+      expect(vlan_reqs[0].source).to eq(bond)
+      expect(vlan_reqs[0].target).to eq(vlan)
+
+      expect(bond_reqs.size).to eq(1)
+      expect(bond_reqs[0].source).to eq(eth)
+      expect(bond_reqs[0].target).to eq(bond)
     end
   end
 end
