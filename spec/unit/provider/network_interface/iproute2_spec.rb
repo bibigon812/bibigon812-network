@@ -45,10 +45,10 @@ EOS
   context 'ip addr output' do
     before :each do
       described_class.expects(:ip).with('addr').returns output
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/miimon').returns '100'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
+      File.stubs(:read).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
+      File.stubs(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
+      File.stubs(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
+      File.stubs(:read).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
     end
 
     it 'should return resources' do
@@ -57,41 +57,44 @@ EOS
 
     it 'should return the resource eth0' do
       expect(described_class.instances[0].instance_variable_get('@property_hash')).to eq(
-        {
-            ensure: :enabled,
-            ipaddress: %w{127.0.0.1/8 10.255.0.1/32 192.168.0.1/32},
-            mtu: 65536,
-            name: 'lo',
-            provider: :iproute2,
-            type: :eth,
-        }
+          {
+              ensure:    :present,
+              ipaddress: %w{127.0.0.1/8 10.255.0.1/32 192.168.0.1/32},
+              mtu:       65536,
+              name:      'lo',
+              provider:  :iproute2,
+              state:     :unknown,
+              type:      :eth,
+          }
       )
     end
 
     it 'should return the resource eth0' do
       expect(described_class.instances[1].instance_variable_get('@property_hash')).to eq(
-        {
-            ensure: :enabled,
-            ipaddress: %w{10.0.2.15/24},
-            mac: '08:00:27:1d:5a:fb',
-            mtu: 1500,
-            name: 'eth0',
-            provider: :iproute2,
-            type: :eth,
-        }
+          {
+              ensure:    :present,
+              ipaddress: %w{10.0.2.15/24},
+              mac:       '08:00:27:1d:5a:fb',
+              mtu:       1500,
+              name:      'eth0',
+              provider:  :iproute2,
+              state:     :up,
+              type:      :eth,
+          }
       )
     end
 
     it 'should return the resource eth0' do
       expect(described_class.instances[2].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :enabled,
+            ensure:    :present,
             ipaddress: %w{172.16.32.103/24},
-            mac: '08:00:27:9c:76:49',
-            mtu: 1500,
-            name: 'eth1',
-            provider: :iproute2,
-            type: :eth,
+            mac:       '08:00:27:9c:76:49',
+            mtu:       1500,
+            name:      'eth1',
+            provider:  :iproute2,
+            state:     :up,
+            type:      :eth,
         }
       )
     end
@@ -99,12 +102,13 @@ EOS
     it 'should return the resource eth0' do
       expect(described_class.instances[3].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :disabled,
+            ensure:    :present,
             ipaddress: [],
-            mtu: 1500,
-            name: 'ip_vti0',
-            provider: :iproute2,
-            type: :eth,
+            mtu:       1500,
+            name:      'ip_vti0',
+            provider:  :iproute2,
+            state:     :down,
+            type:      :eth,
         }
       )
     end
@@ -112,17 +116,18 @@ EOS
     it 'should return the resource eth0' do
       expect(described_class.instances[4].instance_variable_get('@property_hash')).to eq(
         {
-            bond_lacp_rate: 'slow',
-            bond_miimon: 100,
-            bond_mode: '802.3ad',
+            bond_lacp_rate:        'slow',
+            bond_miimon:           100,
+            bond_mode:             '802.3ad',
             bond_xmit_hash_policy: 'layer3+4',
-            ensure: :enabled,
-            ipaddress: [],
-            mac: '08:00:27:9c:76:49',
-            mtu: 1500,
-            name: 'bond0',
-            provider: :iproute2,
-            type: :bond,
+            ensure:                :present,
+            ipaddress:             [],
+            mac:                   '08:00:27:9c:76:49',
+            mtu:                   1500,
+            name:                  'bond0',
+            provider:              :iproute2,
+            state:                 :up,
+            type:                  :bond,
         }
       )
     end
@@ -130,14 +135,16 @@ EOS
     it 'should return the resource eth0' do
       expect(described_class.instances[5].instance_variable_get('@property_hash')).to eq(
         {
-            ensure: :enabled,
+            ensure:    :present,
             ipaddress: %w{172.16.33.103/24},
-            mac: '08:00:27:9c:76:49',
-            mtu: 1500,
-            name: 'bond0.100',
-            parent: 'bond0',
-            provider: :iproute2,
-            type: :vlan,
+            mac:       '08:00:27:9c:76:49',
+            mtu:       1500,
+            name:      'bond0.100',
+            parent:    'bond0',
+            provider:  :iproute2,
+            state:     :up,
+            tag:       100,
+            type:      :vlan,
         }
       )
     end
@@ -145,11 +152,11 @@ EOS
 
   let(:provider) do
     described_class.new(
-        ensure: :enabled,
+        ensure:    :enabled,
         ipaddress: %w{172.16.32.108/24},
-        mtu: 1500,
-        name: 'eth1',
-        provider: :iproute2,
+        mtu:       1500,
+        name:      'eth1',
+        provider:  :iproute2,
     )
   end
 
@@ -167,11 +174,11 @@ EOS
     end
 
     before :each do
-      described_class.stubs(:ip).with('addr').returns output
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/miimon').returns '100'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
-      described_class.stubs(:cat).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
+      described_class.expects(:ip).with('addr').returns output
+      File.expects(:read).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
+      File.expects(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
+      File.expects(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
+      File.expects(:read).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
     end
 
     it 'should find provider for resource' do
@@ -189,10 +196,10 @@ EOS
     context 'an ethernet interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            name: 'eth1',
+            name:      'eth1',
             ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac: '01:23:45:67:89:ab',
-            mtu: 1500
+            mac:       '01:23:45:67:89:ab',
+            mtu:       1500
         )
       end
       it 'with all params' do
@@ -209,11 +216,11 @@ EOS
     context 'a vlan interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            name: 'vlan100',
+            name:      'vlan100',
             ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac: '01:23:45:67:89:ab',
-            mtu: 1500,
-            parent: 'eth0'
+            mac:       '01:23:45:67:89:ab',
+            mtu:       1500,
+            parent:    'eth0'
         )
       end
 
@@ -225,6 +232,54 @@ EOS
         provider.expects(:ip).with(%w{link set dev vlan100 mtu 1500})
         provider.expects(:ip).with(%w{link set dev vlan100 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev vlan100 up})
+        provider.create
+      end
+    end
+
+    context 'a bond interface' do
+      let(:resource) do
+        Puppet::Type.type(:network_interface).new(
+            bond_slaves: ['eth0',],
+            name:        'bond0',
+            ipaddress:   %w{10.255.255.1/24 172.31.255.1/24},
+            mac:         '01:23:45:67:89:ab',
+            mtu:         1500
+        )
+      end
+
+      before :each do
+        File.expects(:read).with('/sys/class/net/eth0/operstate').returns 'up'
+        provider.expects(:ip).with(%w{link set dev eth0 down})
+        provider.expects(:ip).with(%w{link set dev eth0 up})
+        File.expects(:write).with('/sys/class/net/bond0/bonding/lacp_rate', 'slow').returns 4
+        File.expects(:write).with('/sys/class/net/bond0/bonding/miimon', '100').returns 3
+        File.expects(:write).with('/sys/class/net/bond0/bonding/mode', '802.3ad').returns 7
+        File.expects(:write).with('/sys/class/net/bond0/bonding/xmit_hash_policy', 'layer3+4').returns 8
+        File.expects(:write).with('/sys/class/net/bond0/bonding/slaves', '+eth0').returns 5
+      end
+
+      it 'without bonding driver' do
+        resource.provider = provider
+        File.expects(:exists?).with('/sys/class/net/bonding_masters').returns false
+        provider.expects(:modprobe).with(%w{bonding})
+        File.expects(:read).with('/sys/class/net/bonding_masters').returns 'bond0'
+        File.expects(:write).with('/sys/class/net/bonding_masters', '-bond0').returns 6
+        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
+        provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
+        provider.expects(:ip).with(%w{link set dev bond0 up})
+        provider.create
+      end
+
+      it 'with bonding driver' do
+        resource.provider = provider
+        File.expects(:exists?).with('/sys/class/net/bonding_masters').returns true
+        provider.expects(:ip).with(%w{addr add 10.255.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{addr add 172.31.255.1/24 dev bond0})
+        provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
+        provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
+        provider.expects(:ip).with(%w{link set dev bond0 up})
         provider.create
       end
     end

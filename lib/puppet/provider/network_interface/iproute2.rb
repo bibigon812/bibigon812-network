@@ -3,20 +3,32 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
   confine exists: '/usr/sbin/ip'
 
-  commands cat: 'cat', echo: 'echo', ip: 'ip', modprobe: 'modprobe'
+  commands ip: 'ip', modprobe: 'modprobe'
 
 
   @resource_map = {
       ipaddress: {
           default: [],
-          regexp: /\A\s+inet\s(\S+)\s/,
-          type: :array,
+          regexp:  /\A\s+inet\s(\S+)\s/,
+          type:    :array,
       },
       mac: {
-          regexp: /\A\s+link\/ether\s(\S+)\s/,
-          type: :string,
+          regexp:  /\A\s+link\/ether\s(\S+)\s/,
+          type:    :string,
       }
   }
+
+  @bond_options_map = {
+        bond_lacp_rate:        'lacp_rate',
+        bond_miimon:           'miimon',
+        bond_mode:             'mode',
+        bond_xmit_hash_policy: 'xmit_hash_policy',
+  }
+
+  def initialize(value={})
+    super(value)
+    @state_hash = {} # if_name => state
+  end
 
   def self.instances
     providers = []
@@ -29,12 +41,12 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
         name_and_parent = $1
         mtu = Integer($2)
         state = case $4
-                  when 'UNKNOWN', 'UP'
-                    :enabled
+                  when 'UP'
+                    :up
                   when 'DOWN'
-                    :disabled
+                    :down
                   else
-                    :absent
+                    :unknown
                 end
 
         name, parent = name_and_parent.split('@')
@@ -54,18 +66,30 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
         end
 
         hash = {
-            ensure: state,
-            mtu: mtu,
-            name: name.split(/@/).first,
+            ensure:   :present,
+            mtu:      mtu,
+            name:     name,
             provider: self.name,
-            type: type,
+            state:    state,
+            type:     type,
         }
 
+        # Add bond options
         if type == :bond
-          hash[:bond_lacp_rate] = cat("/sys/class/net/#{name}/bonding/lacp_rate").split(/\s/).first
-          hash[:bond_miimon] = Integer(cat("/sys/class/net/#{name}/bonding/miimon"))
-          hash[:bond_mode] = cat("/sys/class/net/#{name}/bonding/mode").split(/\s/).first
-          hash[:bond_xmit_hash_policy] = cat("/sys/class/net/#{name}/bonding/xmit_hash_policy").split(/\s/).first
+          @bond_options_map.each do |bond_option, file|
+            if bond_option == :bond_miimon
+              hash[bond_option] = Integer(File.read("/sys/class/net/#{name}/bonding/#{file}"))
+            else
+              hash[bond_option] = File.read("/sys/class/net/#{name}/bonding/#{file}").split(/\s/).first
+            end
+          end
+        elsif type == :vlan
+          hash[:tag] =
+              if name.include?('vlan')
+                Integer(resource[:name].sub(/\Avlan/, ''))
+              else
+                Integer(name.split('.').last)
+              end
         end
 
         hash[:parent] = parent unless parent.nil? or parent == 'NONE'
@@ -119,7 +143,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     debug 'Prefetch resources'
     providers = instances
     resources.keys.each do |name|
-      if provider = providers.find{ |provider| provider.name == name }
+      if provider = providers.find { |provider| provider.name == name }
         resources[name].provider = provider
       end
     end
@@ -128,16 +152,30 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   def create
     debug 'Enabling the %{name} interface' % { name: @resource[:mtu] }
 
+    bond_options_map = self.class.instance_variable_get('@bond_options_map')
+
     if @resource[:type] == :vlan
       ip(['link', 'add', 'name', @resource[:name], 'link', @resource[:parent], 'type', 'vlan', 'id', @resource[:tag].to_s])
     elsif @resource[:type] == :bond
-      modprobe([
-                   'bonding',
-                   "mode=#{@resource[:bond_mode]}",
-                   "miimon=#{@resource[:bond_miimon]}",
-                   "lacp_rate=#{@resource[:bond_lacp_rate]}",
-                   "xmit_hash_policy=#{@resource[:bind_xmit_hash_policy]}",
-               ])
+      unless File.exists?('/sys/class/net/bonding_masters')
+        modprobe(['bonding',])
+
+        # Remove the default bond interfaces
+        File.read('/sys/class/net/bonding_masters').split(/\s/).each do |bond|
+          File.write('/sys/class/net/bonding_masters', "-#{bond}")
+        end
+      end
+
+      bond_options_map.each do |bond_option, file|
+        File.write("/sys/class/net/#{@resource[:name]}/bonding/#{file}", @resource[bond_option].to_s)
+      end
+
+      # Add bond slaves
+      @resource[:bond_slaves].each do |slave|
+        ip(['link', 'set', 'dev', slave, 'down']) if get_state(slave) == :up
+        File.write("/sys/class/net/#{@resource[:name]}/bonding/slaves", "+#{slave}")
+        ip(['link', 'set', 'dev', slave, 'up']) if get_state(slave) == :up
+      end
     end
 
     @resource[:ipaddress].each do |ipaddress|
@@ -147,5 +185,24 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     ip(['link', 'set', 'dev', @resource[:name], 'mtu', @resource[:mtu].to_s])
     ip(['link', 'set', 'dev', @resource[:name], 'address', @resource[:mac]])
     ip(['link', 'set', 'dev', @resource[:name], 'up'])
+  end
+
+  def destroy
+    if @property_hash[:type] == :bond
+    elsif @property_hash[:type] == :vlan
+
+    end
+  end
+
+  private
+  def get_state(name)
+    @state_hash[name] ||=
+        begin
+          File.read("/sys/class/net/#{name}/operstate").to_sym
+        rescue
+          :unknown
+        end
+
+    @state_hash[name]
   end
 end

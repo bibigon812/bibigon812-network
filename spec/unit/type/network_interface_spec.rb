@@ -46,11 +46,11 @@ describe described_type do
       end
 
       it 'should support :enabled' do
-        expect { described_class.new(name: 'foo', ensure: :enabled) }.to_not raise_error
+        expect { described_class.new(name: 'foo', ensure: :enabled) }.to raise_error Puppet::Error, /Invalid value/
       end
 
       it 'should support :disabled' do
-        expect { described_class.new(name: 'foo', ensure: :disabled) }.to_not raise_error
+        expect { described_class.new(name: 'foo', ensure: :disabled) }.to raise_error Puppet::Error, /Invalid value/
       end
     end
 
@@ -69,6 +69,24 @@ describe described_type do
 
       it 'should contain :vlan' do
         expect(described_class.new(name: 'vlan100')[:type]).to eq(:vlan)
+      end
+    end
+
+    describe 'state' do
+      it 'should contain :ethernet' do
+        expect(described_class.new(name: 'eth1')[:state]).to eq(:up)
+      end
+
+      it 'should contain :bonding' do
+        expect(described_class.new(name: 'bond0')[:state]).to eq(:up)
+      end
+
+      it 'should contain :vlan' do
+        expect(described_class.new(name: 'bond0.100')[:state]).to eq(:up)
+      end
+
+      it 'should contain :vlan' do
+        expect(described_class.new(name: 'lo')[:state]).to eq(:unknown)
       end
     end
 
