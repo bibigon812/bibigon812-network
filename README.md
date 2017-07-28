@@ -14,14 +14,10 @@
 
 ## Description
 
-Start with a one- or two-sentence summary of what the module does and/or what
-problem it solves. This is your 30-second elevator pitch for your module.
-Consider including OS/Puppet version it works with.
-
-You can give more descriptive information in a second paragraph. This paragraph
-should answer the questions: "What does this module *do*?" and "Why would I use
-it?" If your module has a range of functionality (installation, configuration,
-management, etc.), this is the time to mention it.
+This module manages network interfaces without restarting the network 
+subsystem. It contains of two parts. One uses iproute2 tools and system files
+placed in `/sys/class/net`. The other manages files needed to restore the state
+after OS boots.
 
 ## Setup
 
@@ -55,12 +51,15 @@ basic use of the module.
 
 ## Usage
 
+
+
 ```puppet
 network_interface { ['eth0', 'eth1']:
     mtu => 9000,
 }
 ```
 
+### Create the bond interface
 ```puppet
 network_interface { 'bond0':
     ensure         => present,
@@ -69,7 +68,7 @@ network_interface { 'bond0':
 }
 ```
 
-### Create vlan interface
+### Create the vlan interface
 ```puppet
 network_interface { 'bond0.100':
     ensure => present,
@@ -109,16 +108,19 @@ network_interface { 'super_vlan':
 
 - `name`. Interface name.
 - `type`. Interface type. Can be `hw`, `bond` and `vlan`.
-- `bond_lacp_rate`. Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode. Default to `slow`.
-- `bond_miimon`. Specifies the MII link monitoring frequency in milliseconds. Default to `100`.
-- `bond_mode`. Specifies one of the bonding policies. Default to `802.3ad`.
-- `bond_slaves`. Specifies a list of the bonding slaves. Default to `[]`.
-- `bond_xmit_hash_policy`. This policy uses upper layer protocol information, when available, to generate the hash. Default to `layer3+4`.
-- `ipaddress`. Specifies a list of IP addresses. Default to `[]`.
+- `bond_lacp_rate`. Option specifying the rate in which we'll ask our link
+partner to transmit LACPDU packets in 802.3ad mode. Defaults to `slow`.
+- `bond_miimon`. Specifies the MII link monitoring frequency in milliseconds.
+Defaults to `100`.
+- `bond_mode`. Specifies one of the bonding policies. Defaults to `802.3ad`.
+- `bond_slaves`. Specifies a list of the bonding slaves. Defaults to `[]`.
+- `bond_xmit_hash_policy`. This policy uses upper layer protocol information,
+when available, to generate the hash. Defaults to `layer3+4`.
+- `ipaddress`. Specifies a list of IP addresses. Defaults to `[]`.
 - `mac`. Specifies a MAC address.
-- `mtu`. Specifies the maximum transmission unit. Default to `1500`.
+- `mtu`. Specifies the maximum transmission unit. Defaults to `1500`.
 - `parent`. Specifies a parent interface.
-- `state`. State of this interface. Can be `up` and `down`. Default to `up`.
+- `state`. State of this interface. Can be `up` and `down`. Defaults to `up`.
 - `tag`. Vlan ID.
 
 ## Limitations
