@@ -38,7 +38,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     ip('addr').split(/\n/).collect do |line|
       # Find a new interface
-      if /\A\d+:\s(\S+):\s<[A-Z,_]+>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
+      if /\A\d+:\s(\S+):\s<[A-Z,_-]+>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
         name_and_parent = $1
         mtu = Integer($2)
         state = parse_state($4)
@@ -49,7 +49,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
         # Add hash to providers
         unless hash.empty?
-          debug 'Instantiated the interface: %{name}.' % { name: hash[:name] }
+          debug 'Instantiated the interface %{name}.' % { name: hash[:name] }
           providers << new(hash)
         end
 
@@ -119,7 +119,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     end
 
     unless hash.empty?
-      debug 'Instantiated the interface: %{name}.' % { name: hash[:name] }
+      debug 'Instantiated the interface %{name}.' % { name: hash[:name] }
       providers << new(hash)
     end
 
@@ -219,9 +219,9 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       # Create a bond interface
       File.write('/sys/class/net/bonding_masters', "+#{@resource[:name]}")
 
-      self.bond_lacp_rate        = @resource[:bond_lacp_rate]
       self.bond_miimon           = @resource[:bond_miimon]
       self.bond_mode             = @resource[:bond_mode]
+      self.bond_lacp_rate        = @resource[:bond_lacp_rate]
       self.bond_xmit_hash_policy = @resource[:bond_xmit_hash_policy]
       self.bond_slaves           = @resource[:bond_slaves]
     end

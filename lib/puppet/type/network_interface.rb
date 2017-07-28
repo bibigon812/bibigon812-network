@@ -70,6 +70,8 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:ipaddress, array_matching: :all) do
     desc 'Specifies a list of IP addresses.'
 
+    defaultto []
+
     validate do |value|
       begin
         IPAddr.new value
