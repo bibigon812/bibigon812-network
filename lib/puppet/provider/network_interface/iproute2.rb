@@ -489,7 +489,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       rescue Exception => e
         notice e.message
       end
-      ip(['link', 'set', 'dev', slave, 'up']) if get_state(slave) == :up
+      ip(['link', 'set', 'dev', slave, 'up']) if get_interface_state(slave) == :up
     end
   end
 end
