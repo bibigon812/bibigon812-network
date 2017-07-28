@@ -350,4 +350,37 @@ EOS
       end
     end
   end
+
+  describe '#bond_slaves=(value)' do
+    before :each do
+      provider.stubs(:exists?).returns true
+      File.stubs(:directory?).with('/sys/class/net/bond0/bonding').returns true
+      File.stubs(:directory?).with('/sys/class/net/eth2').returns true
+      File.stubs(:directory?).with('/sys/class/net/eth3').returns true
+    end
+
+    context 'an bond interface' do
+      let(:provider) do
+        described_class.new(
+            name:     'bond0',
+            provider: :iproute2,
+            state:    :up,
+        )
+      end
+
+      it 'should add slaves' do
+        File.expects(:read).with('/sys/class/net/eth2/operstate').returns 'up'
+        File.expects(:read).with('/sys/class/net/eth3/operstate').returns 'up'
+        File.expects(:write).with('/sys/class/net/bond0/bonding/slaves', '+eth2').returns 5
+        File.expects(:write).with('/sys/class/net/bond0/bonding/slaves', '+eth3').returns 5
+        provider.expects(:ip).with(%w{link set dev bond0 down})
+        provider.expects(:ip).with(%w{link set dev eth2 down})
+        provider.expects(:ip).with(%w{link set dev eth3 down})
+        provider.expects(:ip).with(%w{link set dev bond0 up})
+        provider.expects(:ip).with(%w{link set dev eth2 up})
+        provider.expects(:ip).with(%w{link set dev eth3 up})
+        provider.bond_slaves = %w{eth2 eth3}
+      end
+    end
+  end
 end

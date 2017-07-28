@@ -249,10 +249,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     self.state = :down
 
     if @property_hash[:type] == :bond
-      debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
+      debug 'Destroy the %{name} interface.' % { name: @property_hash[:name] }
 
-      # Remove slaves
-      delete_bond_slaves(@property_hash[:name], @property_hash[:bond_slaves])
+      debug 'Remove bond slaves %{slaves}' % { slaves: self.bond_slaves.inspect }
+      delete_bond_slaves(@property_hash[:name], self.bond_slaves)
       ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'bond'])
 
     elsif @property_hash[:type] == :vlan
@@ -384,7 +384,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_slaves=(value)
+    state = self.state
+    self.state = :down if state == :up
     sync_bond_slaves(@property_hash[:name], self.bond_slaves, value)
+    self.state = :up if state == :up
     @property_hash[:bond_slaves] = value
   end
 
@@ -450,7 +453,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
           File.read("/sys/class/net/#{name}/operstate").to_sym
         rescue Exception =>  e
           notice e.message
-          :unknown
+          :down
         end
 
     @state_hash[name]
@@ -467,7 +470,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     # Exit if no bond interface
     return unless bond_exists?(bond)
 
-    prefix = command == :delete ? '-' : '+'
+    prefix = command == delete ? '-' : '+'
 
     slaves.each do |slave|
       next unless interface_exists?(slave) and self.class.parse_interface_type(slave) == :hw
