@@ -257,6 +257,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
+  def exists?
+    @property_hash[:ensure] == :present
+  end
+
   def ipaddress
     @property_hash[:ipaddress] || []
   end
