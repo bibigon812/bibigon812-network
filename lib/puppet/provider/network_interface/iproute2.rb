@@ -450,8 +450,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def interface_exists?(name)
-    File.directory?("/sys/class/net/#{name}")
+  def hw_interface_exists?(name)
+    File.symlink?("/sys/class/net/#{name}")
   end
 
 
@@ -481,7 +481,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     prefix = command == delete ? '-' : '+'
 
     slaves.each do |slave|
-      next unless interface_exists?(slave) and self.class.parse_interface_type(slave) == :hw
+      next unless hw_interface_exists?(slave)
 
       ip(['link', 'set', 'dev', slave, 'down']) if get_state(slave) == :up
       begin

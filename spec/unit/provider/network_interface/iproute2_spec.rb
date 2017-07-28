@@ -247,7 +247,7 @@ EOS
 
       before :each do
         File.expects(:directory?).with('/sys/class/net/bond0/bonding').returns true
-        File.expects(:directory?).with('/sys/class/net/eth0').returns true
+        File.expects(:symlink?).with('/sys/class/net/eth0').returns true
         File.expects(:read).with('/sys/class/net/eth0/operstate').returns 'up'
         provider.expects(:ip).with(%w{link set dev eth0 down})
         provider.expects(:ip).with(%w{link set dev eth0 up})
@@ -358,8 +358,8 @@ EOS
     before :each do
       provider.stubs(:exists?).returns true
       File.stubs(:directory?).with('/sys/class/net/bond0/bonding').returns true
-      File.stubs(:directory?).with('/sys/class/net/eth2').returns true
-      File.stubs(:directory?).with('/sys/class/net/eth3').returns true
+      File.stubs(:symlink?).with('/sys/class/net/eth2').returns true
+      File.stubs(:symlink?).with('/sys/class/net/eth3').returns true
     end
 
     context 'an bond interface' do
