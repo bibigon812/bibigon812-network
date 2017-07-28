@@ -167,7 +167,15 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     elsif name.include?('bond')
       :bond
     else
-      :hw
+      begin
+        if File.read('/sys/class/net/bonding_masters').split(/\s/).include?(name)
+          :bond
+        else
+          :hw
+        end
+      rescue
+        :hw
+      end
     end
   end
 

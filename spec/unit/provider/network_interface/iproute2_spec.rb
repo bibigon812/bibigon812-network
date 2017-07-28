@@ -49,6 +49,7 @@ EOS
       File.stubs(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
       File.stubs(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
       File.stubs(:read).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
+      File.stubs(:read).with('/sys/class/net/bonding_masters').returns ''
     end
 
     it 'should return resources' do
@@ -180,6 +181,7 @@ EOS
       File.expects(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
       File.expects(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
       File.expects(:read).with('/sys/class/net/bond0/bonding/xmit_hash_policy').returns 'layer3+4'
+      File.stubs(:read).with('/sys/class/net/bonding_masters').returns ''
     end
 
     it 'should find provider for resource' do
@@ -254,6 +256,7 @@ EOS
         File.expects(:write).with('/sys/class/net/bond0/bonding/mode', '802.3ad').returns 7
         File.expects(:write).with('/sys/class/net/bond0/bonding/xmit_hash_policy', 'layer3+4').returns 8
         File.expects(:write).with('/sys/class/net/bond0/bonding/slaves', '+eth0').returns 5
+        File.stubs(:read).with('/sys/class/net/bonding_masters').returns ''
       end
 
       it 'without bonding driver' do
@@ -369,6 +372,7 @@ EOS
       end
 
       it 'should add slaves' do
+        File.stubs(:read).with('/sys/class/net/bonding_masters').returns ''
         File.expects(:read).with('/sys/class/net/eth2/operstate').returns 'up'
         File.expects(:read).with('/sys/class/net/eth3/operstate').returns 'up'
         File.expects(:write).with('/sys/class/net/bond0/bonding/slaves', '+eth2').returns 5
