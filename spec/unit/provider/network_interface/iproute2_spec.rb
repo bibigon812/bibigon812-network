@@ -33,7 +33,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
        valid_lft forever preferred_lft forever
 4: ip_vti0@NONE: <NOARP> mtu 1500 qdisc noop state DOWN
     link/ipip 0.0.0.0 brd 0.0.0.0
-5: bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+5: bond0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
 6: bond0.100@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff

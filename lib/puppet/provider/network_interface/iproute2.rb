@@ -38,7 +38,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     ip('address').split(/\n/).collect do |line|
       # Find a new interface
-      if /\A\d+:\s(\S+):\s<(?:LOOPBACK)?,?(?:BROADCAST)?,?(?:MULTICAST)?,?(?:NOARP)?,?(UP)?,?(?:LOWER_UP)?>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
+      if /\A\d+:\s(\S+):\s<(?:NO-CARRIER)?,?(?:LOOPBACK)?,?(?:BROADCAST)?,?(?:MULTICAST)?,?(?:NOARP)?,?(UP)?,?(?:LOWER_UP)?>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
         name_and_parent = $1
         state = parse_state($2)
         mtu = Integer($3)
