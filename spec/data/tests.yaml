@@ -1,0 +1,4 @@
+---
+network::network_manager:
+  ensure: running
+  enable: true

@@ -44,5 +44,7 @@
 #
 class network {
 
+  contain network::network_manager
+  # contain network::interfaces
 
 }
