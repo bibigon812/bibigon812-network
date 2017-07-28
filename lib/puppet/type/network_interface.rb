@@ -70,8 +70,6 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:ipaddress, array_matching: :all) do
     desc 'Specifies a list of IP addresses.'
 
-    defaultto []
-
     validate do |value|
       begin
         IPAddr.new value
@@ -80,6 +78,8 @@ Puppet::Type.newtype(:network_interface) do
       end
       fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value } unless value.include?('/')
     end
+
+    defaultto []
   end
 
   newproperty(:mac) do

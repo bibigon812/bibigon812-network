@@ -49,7 +49,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
         # Add hash to providers
         unless hash.empty?
-          debug 'Instantiated the interface %{name}.' % { name: hash[:name] }
+          debug 'Instantiated the interface %{name} with %{hash}' % {
+              name: hash[:name],
+              hash: hash.inspect,
+          }
+
           providers << new(hash)
         end
 
@@ -119,7 +123,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     end
 
     unless hash.empty?
-      debug 'Instantiated the interface %{name}.' % { name: hash[:name] }
+      debug 'Instantiated the interface %{name} with %{hash}' % {
+          name: hash[:name],
+          hash: hash.inspect,
+      }
+
       providers << new(hash)
     end
 

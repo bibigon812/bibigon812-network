@@ -237,7 +237,7 @@ EOS
         Puppet::Type.type(:network_interface).new(
             bond_slaves: ['eth0',],
             name:        'bond0',
-            ipaddress:   %w{10.255.255.1/24 172.31.255.1/24},
+            ipaddress:   [],
             mac:         '01:23:45:67:89:ab',
             mtu:         1500
         )
@@ -263,8 +263,6 @@ EOS
         File.expects(:read).with('/sys/class/net/bonding_masters').returns 'bond0'
         File.expects(:write).with('/sys/class/net/bonding_masters', '-bond0').returns 6
         File.expects(:write).with('/sys/class/net/bonding_masters', '+bond0').returns 6
-        provider.expects(:ip).with(%w{address add 10.255.255.1/24 dev bond0})
-        provider.expects(:ip).with(%w{address add 172.31.255.1/24 dev bond0})
         provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
         provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev bond0 up})
@@ -275,8 +273,6 @@ EOS
         resource.provider = provider
         File.expects(:exists?).with('/sys/class/net/bonding_masters').returns true
         File.expects(:write).with('/sys/class/net/bonding_masters', '+bond0').returns 6
-        provider.expects(:ip).with(%w{address add 10.255.255.1/24 dev bond0})
-        provider.expects(:ip).with(%w{address add 172.31.255.1/24 dev bond0})
         provider.expects(:ip).with(%w{link set dev bond0 mtu 1500})
         provider.expects(:ip).with(%w{link set dev bond0 address 01:23:45:67:89:ab})
         provider.expects(:ip).with(%w{link set dev bond0 up})
