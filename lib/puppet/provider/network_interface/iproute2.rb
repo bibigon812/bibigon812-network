@@ -36,7 +36,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     hash = {}
 
-    ip('addr').split(/\n/).collect do |line|
+    ip('address').split(/\n/).collect do |line|
       # Find a new interface
       if /\A\d+:\s(\S+):\s<[A-Z,_-]+>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
         name_and_parent = $1
@@ -49,7 +49,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
         # Add hash to providers
         unless hash.empty?
-          debug 'Instantiated the interface %{name} with %{hash}' % {
+          debug 'Instantiated the %{name} interface with %{hash}.' % {
               name: hash[:name],
               hash: hash.inspect,
           }
@@ -123,7 +123,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     end
 
     unless hash.empty?
-      debug 'Instantiated the interface %{name} with %{hash}' % {
+      debug 'Instantiated the %{name} interface with %{hash}.' % {
           name: hash[:name],
           hash: hash.inspect,
       }
@@ -195,11 +195,14 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   def create
     # Don't create hardware interface
     if @resource[:type] == :hw
-      debug 'Can not create the hardware interface.'
+      notice 'Can not create the hardware interface.'
       return
     end
 
-    debug 'Creating the %{name} interface' % { name: @resource[:name] }
+    debug 'Creating the %{name} interface with %{hash}.' % {
+        name: @resource[:name],
+        hash: @resource.to_hash.inspect
+    }
 
     @property_hash[:name] = @resource[:name]
     @property_hash[:ensure] = :present

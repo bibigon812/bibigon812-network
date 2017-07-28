@@ -44,7 +44,7 @@ EOS
 
   context 'ip address output' do
     before :each do
-      described_class.expects(:ip).with('addr').returns output
+      described_class.expects(:ip).with('address').returns output
       File.stubs(:read).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
       File.stubs(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
       File.stubs(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
@@ -175,7 +175,7 @@ EOS
     end
 
     before :each do
-      described_class.expects(:ip).with('addr').returns output
+      described_class.expects(:ip).with('address').returns output
       File.expects(:read).with('/sys/class/net/bond0/bonding/lacp_rate').returns 'slow'
       File.expects(:read).with('/sys/class/net/bond0/bonding/miimon').returns '100'
       File.expects(:read).with('/sys/class/net/bond0/bonding/mode').returns '802.3ad'
