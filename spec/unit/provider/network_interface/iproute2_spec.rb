@@ -63,7 +63,7 @@ EOS
               mtu:       65536,
               name:      'lo',
               provider:  :iproute2,
-              state:     :unknown,
+              state:     :up,
               type:      :hw,
           }
       )

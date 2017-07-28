@@ -124,8 +124,8 @@ Puppet::Type.newtype(:network_interface) do
 
   newproperty(:state) do
     desc 'State of this interface.'
-    newvalues(:up, :down, :unknown)
-    defaultto { resource[:name] == 'lo' ? :unknown : :up }
+    newvalues(:up, :down)
+    defaultto :up
   end
 
   newproperty(:tag) do

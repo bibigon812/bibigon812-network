@@ -88,10 +88,6 @@ describe described_type do
       it 'should contain :up' do
         expect(described_class.new(name: 'bond0.100')[:state]).to eq(:up)
       end
-
-      it 'should contain :unknown' do
-        expect(described_class.new(name: 'lo')[:state]).to eq(:unknown)
-      end
     end
 
     describe 'bond_lacp_rate' do

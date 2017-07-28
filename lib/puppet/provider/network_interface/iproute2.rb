@@ -38,10 +38,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     ip('address').split(/\n/).collect do |line|
       # Find a new interface
-      if /\A\d+:\s(\S+):\s<[A-Z,_-]+>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
+      if /\A\d+:\s(\S+):\s<(?:LOOPBACK)?,?(?:BROADCAST)?,?(?:MULTICAST)?,?(?:NOARP)?,?(UP)?,?(?:LOWER_UP)?>\smtu\s(\d+)\sqdisc\s(\S+)\sstate\s(\S+)/ =~ line
         name_and_parent = $1
-        mtu = Integer($2)
-        state = parse_state($4)
+        state = parse_state($2)
+        mtu = Integer($3)
+
 
         name, parent = name_and_parent.split('@')
 
@@ -184,10 +185,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     case value
       when 'UP'
         :up
-      when 'DOWN'
-        :down
       else
-        :unknown
+        :down
     end
   end
 
@@ -277,13 +276,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def ipaddress=(value)
-    @property_hash[:ipaddress] ||= []
-
-    (value - @property_hash[:ipaddress]).each do |ipaddress|
+    (value - self.ipaddress).each do |ipaddress|
       ip(['address', 'add', ipaddress, 'dev', @property_hash[:name]])
     end
 
-    (@property_hash[:ipaddress] - value).each do |ipaddress|
+    (self.ipaddress - value).each do |ipaddress|
       ip(['address', 'delete', ipaddress, 'dev', @property_hash[:name]])
     end
 
@@ -340,11 +337,16 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_lacp_rate=(value)
+    state = self.state
+    self.state = :down if state == :up
+
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/lacp_rate", value.to_s)
     rescue Exception => e
       notice e.message
     end
+
+    self.state = :up if state == :up
 
     @property_hash[:bond_lacp_rate] = value
   end
@@ -382,8 +384,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_slaves=(value)
-    @property_hash[:bond_slaves] ||= []
-    sync_bond_slaves(@property_hash[:name], @property_hash[:bond_slaves], value)
+    sync_bond_slaves(@property_hash[:name], self.bond_slaves, value)
     @property_hash[:bond_slaves] = value
   end
 
