@@ -388,6 +388,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     @property_hash[:bond_xmit_hash_policy] = value
   end
 
+  def tag
+    @property_hash[:tag] || :absent
+  end
+
   def tag=(value)
     ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
     @property_hash[:tag] = value
