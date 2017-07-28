@@ -295,6 +295,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def mac=(value)
+    return if value.nil?
     ip(['link', 'set', 'dev', @property_hash[:name], 'address', value])
     @property_hash[:mac] = value
   end
@@ -304,6 +305,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def mtu=(value)
+    return if value.nil?
     ip(['link', 'set', 'dev', @property_hash[:name], 'mtu', value.to_s])
     @property_hash[:mtu] = value
   end
@@ -404,6 +406,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def tag=(value)
+    return if value.nil?
     ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
     @property_hash[:tag] = value
   end
