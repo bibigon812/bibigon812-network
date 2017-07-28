@@ -1,0 +1,11 @@
+---
+lookup_options:
+  network::interfaces:
+    merge:
+      strategy: deep
+  network::network_manager:
+    merge:
+      strategy: hash
+network::network_manager:
+  ensure: running
+  enable: true
