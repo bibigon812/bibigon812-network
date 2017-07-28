@@ -153,7 +153,7 @@ EOS
 
   let(:provider) do
     described_class.new(
-        ensure:    :enabled,
+        ensure:    :present,
         ipaddress: [],
         mtu:       1500,
         name:      'eth1',
@@ -286,6 +286,72 @@ EOS
   end
 
   describe '#destroy' do
+    before :each do
+      provider.stubs(:exists?).returns true
+    end
 
+    context 'an ethernet interface' do
+      let(:resource) do
+        Puppet::Type.type(:network_interface).new(
+            ensure:    :absent,
+            name:      'eth1',
+            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+            mac:       '01:23:45:67:89:ab',
+            mtu:       1500
+        )
+      end
+
+      let(:provider) do
+        described_class.new(
+            ensure:    :present,
+            ipaddress: [],
+            mtu:       1500,
+            name:      'eth1',
+            provider:  :iproute2,
+            state:     :up,
+            type:      :hw,
+        )
+      end
+
+
+      it 'with all params' do
+        provider.expects(:ip).with(%w{link set dev eth1 down})
+        resource.provider = provider
+        provider.destroy
+      end
+    end
+
+    context 'a vlan interface' do
+      let(:resource) do
+        Puppet::Type.type(:network_interface).new(
+            ensure:    :absent,
+            name:      'vlan100',
+            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+            mac:       '01:23:45:67:89:ab',
+            mtu:       1500,
+            parent:    'eth0'
+        )
+      end
+
+      let(:provider) do
+        described_class.new(
+            ensure:    :present,
+            ipaddress: [],
+            mtu:       1500,
+            name:      'vlan100',
+            provider:  :iproute2,
+            state:     :up,
+            tag:       100,
+            type:      :vlan
+        )
+      end
+
+      it 'with all params' do
+        resource.provider = provider
+        provider.expects(:ip).with(%w{link set dev vlan100 down})
+        provider.expects(:ip).with(%w{link delete dev vlan100 type vlan})
+        provider.destroy
+      end
+    end
   end
 end

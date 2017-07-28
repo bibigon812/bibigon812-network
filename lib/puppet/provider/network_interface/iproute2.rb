@@ -25,7 +25,6 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
         bond_xmit_hash_policy: 'xmit_hash_policy',
   }
 
-
   def initialize(value = {})
     super(value)
     @state_hash = {}  # interface_name => :up or :down
@@ -196,9 +195,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     @property_hash[:name] = @resource[:name]
     @property_hash[:ensure] = :present
+    self.type = @resource[:type]
 
     if @resource[:type] == :vlan
-      ip(['link', 'add', 'name', @resource[:name], 'link', @resource[:parent], 'type', 'vlan', 'id', @resource[:tag].to_s])
+      self.parent = @resource[:parent]
+      self.tag = @resource[:tag]
 
     elsif @resource[:type] == :bond
       # Insert the kernel module `bonding`
@@ -228,19 +229,26 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     self.ipaddress = @resource[:ipaddress]
     self.mtu       = @resource[:mtu]
     self.mac       = @resource[:mac]
-
-    # Set a state
-    ip(['link', 'set', 'dev', @resource[:name], @resource[:state].to_s]) unless @resource[:state] == :unknown
+    self.state     = @resource[:state]
   end
 
 
   def destroy
+    debug 'Shutdown the interface %{name}.' % { name: @property_hash[:name] }
+
+    self.state = :down
+
     if @property_hash[:type] == :bond
+      debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
+
       # Remove slaves
       delete_bond_slaves(@property_hash[:name], @property_hash[:bond_slaves])
       ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'bond'])
+
     elsif @property_hash[:type] == :vlan
+      debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
       ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'vlan'])
+
     else
       debug 'Can not destroy the hardware interface \'%{name}\'.' % { name: @property_hash[:name] }
     end
@@ -250,7 +258,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
 
   def ipaddress
-    @property_hash[:ipaddress]
+    @property_hash[:ipaddress] || []
   end
 
   def ipaddress=(value)
@@ -277,12 +285,37 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def mtu
-    @property_hash[:mtu]
+    @property_hash[:mtu] || :absent
   end
 
   def mtu=(value)
     ip(['link', 'set', 'dev', @property_hash[:name], 'mtu', value.to_s])
     @property_hash[:mtu] = value
+  end
+
+  def parent
+    @property_hash[:parent] || :absent
+  end
+
+  def parent=(value)
+    @property_hash[:parent] = value
+  end
+
+  def state
+    @property_hash[:state] || :absent
+  end
+
+  def state=(value)
+    ip(['link', 'set', 'dev', @property_hash[:name], value.to_s]) unless value == :unknown
+    @property_hash[:state] = value
+  end
+
+  def type
+    @property_hash[:type] || :absent
+  end
+
+  def type=(value)
+    @property_hash[:type] = value
   end
 
   def bond_lacp_rate
@@ -349,6 +382,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     end
 
     @property_hash[:bond_xmit_hash_policy] = value
+  end
+
+  def tag=(value)
+    ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
+    @property_hash[:tag] = value
   end
 
 
