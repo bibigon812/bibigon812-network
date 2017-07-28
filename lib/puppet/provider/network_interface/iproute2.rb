@@ -147,14 +147,14 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def self.bond_exists?(bond)
+  def self.bond_interface_exists?(bond)
     File.directory?("/sys/class/net/#{bond}/bonding")
   end
 
 
   def self.get_bond_slaves(bond)
-    if bond_exists?(bond)
-      File.read("/sys/class/net/#{bond}/bonding/slaves").split(/\s/)
+    if bond_interface_exists?(bond)
+      File.read("/sys/class/net/#{bond}/bonding/slaves").strip.split(/\s/)
     else
       []
     end
@@ -445,7 +445,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def bond_exists?(name)
+  def bond_interface_exists?(name)
     File.directory?("/sys/class/net/#{name}/bonding")
   end
 
@@ -455,10 +455,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def get_state(name)
+  def get_interface_state(name)
     @state_hash[name] ||=
         begin
-          File.read("/sys/class/net/#{name}/operstate").to_sym
+          File.read("/sys/class/net/#{name}/operstate").strip.to_sym
         rescue Exception =>  e
           notice e.message
           :down
@@ -476,14 +476,14 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
   def manage_bond_slaves(bond, slaves, command = add)
     # Exit if no bond interface
-    return unless bond_exists?(bond)
+    return unless bond_interface_exists?(bond)
 
     prefix = command == delete ? '-' : '+'
 
     slaves.each do |slave|
       next unless hw_interface_exists?(slave)
 
-      ip(['link', 'set', 'dev', slave, 'down']) if get_state(slave) == :up
+      ip(['link', 'set', 'dev', slave, 'down']) if get_interface_state(slave) == :up
       begin
         File.write("/sys/class/net/#{bond}/bonding/slaves", "#{prefix}#{slave}")
       rescue Exception => e
