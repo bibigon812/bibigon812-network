@@ -34,13 +34,25 @@ Puppet::Type.newtype(:network_interface) do
     desc %q{Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode.}
 
     newvalues(:slow, :fast)
-    defaultto :slow
+    defaultto {
+      if resource[:name].include?('bond') and not resource[:name].include?('.')
+        :slow
+      else
+        nil
+      end
+    }
   end
 
   newproperty(:bond_miimon) do
     desc 'Specifies the MII link monitoring frequency in milliseconds.'
 
-    defaultto 100
+    defaultto {
+      if resource[:name].include?('bond') and not resource[:name].include?('.')
+        100
+      else
+        nil
+      end
+    }
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
@@ -52,19 +64,38 @@ Puppet::Type.newtype(:network_interface) do
     desc 'Specifies one of the bonding policies.'
 
     newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
-    defaultto '802.3ad'
+    defaultto {
+      if resource[:name].include?('bond') and not resource[:name].include?('.')
+        '802.3ad'
+      else
+        nil
+      end
+    }
   end
 
   newproperty(:bond_slaves, array_matching: :all) do
     desc 'Specifies a list of the bonding slaves.'
-    defaultto []
+
+    defaultto {
+      if resource[:name].include?('bond') and not resource[:name].include?('.')
+        []
+      else
+        nil
+      end
+    }
   end
 
   newproperty(:bond_xmit_hash_policy) do
     desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
 
     newvalues('layer2', 'layer3+4')
-    defaultto 'layer3+4'
+    defaultto {
+      if resource[:name].include?('bond') and not resource[:name].include?('.')
+        'layer3+4'
+      else
+        nil
+      end
+    }
   end
 
   newproperty(:ipaddress, array_matching: :all) do
@@ -164,7 +195,7 @@ Puppet::Type.newtype(:network_interface) do
   autorequire(:network_interface) do
     reqs = []
 
-    reqs += self[:bond_slaves] if self[:type]
+    reqs += self[:bond_slaves] if self[:type] == :bond
     reqs << self[:parent] if self[:parent]
 
     reqs

@@ -368,6 +368,7 @@ EOS
             name:     'bond0',
             provider: :iproute2,
             state:    :up,
+            type:     :bond,
         )
       end
 
