@@ -234,41 +234,41 @@ describe described_type do
       end
     end
 
-    describe 'tag' do
+    describe 'vlanid' do
       it 'should support 100 as a value' do
-        expect { described_class.new(name: 'vlan100', tag: 100) }.to_not raise_error
+        expect { described_class.new(name: 'vlan100', vlanid: 100) }.to_not raise_error
       end
 
       it 'should support 100 as a value' do
-        expect { described_class.new(name: 'eth0.100', tag: 100) }.to_not raise_error
+        expect { described_class.new(name: 'eth0.100', vlanid: 100) }.to_not raise_error
       end
 
       it 'should support 100 as a value' do
-        expect { described_class.new(name: 'bond0.100', tag: 100) }.to_not raise_error
+        expect { described_class.new(name: 'bond0.100', vlanid: 100) }.to_not raise_error
       end
 
       it 'should not support \'100\' as a value' do
-        expect { described_class.new(name: 'bond0.100', tag: '100') }.to raise_error Puppet::Error, /Invalid value/
+        expect { described_class.new(name: 'bond0.100', vlanid: '100') }.to raise_error Puppet::Error, /Invalid value/
       end
 
       it 'should not support 4096 as a value' do
-        expect { described_class.new(name: 'eth0.100', tag: 4096) }.to raise_error Puppet::Error, /Invalid value/
+        expect { described_class.new(name: 'eth0.100', vlanid: 4096) }.to raise_error Puppet::Error, /Invalid value/
       end
 
       it 'should not support 0 as a value' do
-        expect { described_class.new(name: 'foo', tag: 100) }.to raise_error Puppet::Error, /Invalid value/
+        expect { described_class.new(name: 'foo', vlanid: 100) }.to raise_error Puppet::Error, /Invalid value/
       end
 
       it 'should contain 200' do
-        expect(described_class.new(name: 'eth0.200', tag: 200)[:tag]).to eq(200)
+        expect(described_class.new(name: 'eth0.200', vlanid: 200)[:vlanid]).to eq(200)
       end
 
       it 'should contain 100' do
-        expect(described_class.new(name: 'eth0.100')[:tag]).to eq(100)
+        expect(described_class.new(name: 'eth0.100')[:vlanid]).to eq(100)
       end
 
       it 'should contain 100' do
-        expect(described_class.new(name: 'vlan100')[:tag]).to eq(100)
+        expect(described_class.new(name: 'vlan100')[:vlanid]).to eq(100)
       end
     end
   end

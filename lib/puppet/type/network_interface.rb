@@ -94,7 +94,7 @@ Puppet::Type.newtype(:network_interface) do
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
-      fail 'Invalid value \'%{value}\'. Valid values are 1500-9000.' % { value: value } unless value >= 1500 and value <= 9000
+      fail 'Invalid value \'%{value}\'. Valid values are 1-9000.' % { value: value } unless value >= 68 and value <= 9000
     end
   end
 
@@ -128,7 +128,7 @@ Puppet::Type.newtype(:network_interface) do
     defaultto :up
   end
 
-  newproperty(:tag) do
+  newproperty(:vlanid) do
     desc 'Vlan ID.'
 
     defaultto {

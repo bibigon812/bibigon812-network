@@ -145,7 +145,7 @@ EOS
             parent:    'bond0',
             provider:  :iproute2,
             state:     :up,
-            tag:       100,
+            vlanid:    100,
             type:      :vlan,
         }
       )
@@ -340,7 +340,7 @@ EOS
             name:      'vlan100',
             provider:  :iproute2,
             state:     :up,
-            tag:       100,
+            vlanid:    100,
             type:      :vlan
         )
       end

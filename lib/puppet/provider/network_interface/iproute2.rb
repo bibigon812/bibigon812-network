@@ -91,7 +91,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
         # Add vlan options
         elsif type == :vlan
-          hash[:tag] = parse_vlan_tag(name)
+          hash[:vlanid] = parse_vlan_id(name)
         end
 
         hash[:parent] = parent unless parent.nil? or parent == 'NONE'
@@ -180,7 +180,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def self.parse_vlan_tag(name)
+  def self.parse_vlan_id(name)
     if name.include?('vlan')
       Integer(resource[:name].sub(/\Avlan/, ''))
     else
@@ -217,7 +217,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     if @resource[:type] == :vlan
       self.parent = @resource[:parent]
-      self.tag = @resource[:tag]
+      self.vlanid = @resource[:vlanid]
 
     elsif @resource[:type] == :bond
       # Insert the kernel module `bonding`
@@ -413,14 +413,14 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     @property_hash[:bond_xmit_hash_policy] = value
   end
 
-  def tag
-    @property_hash[:tag] || :absent
+  def vlanid
+    @property_hash[:vlanid] || :absent
   end
 
-  def tag=(value)
+  def vlanid=(value)
     return if value.nil?
     ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
-    @property_hash[:tag] = value
+    @property_hash[:vlanid] = value
   end
 
 
