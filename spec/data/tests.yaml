@@ -3,5 +3,6 @@ network::interface_config_dir: /etc/sysconfig/network-scripts
 network::network_manager::enable: true
 network::network_manager::ensure: running
 network::interfaces:
-  eth0:
-    ipaddress: 10.255.255.1/24
+  eth0: {}
+  bond0: {}
+  bond0.100: {}

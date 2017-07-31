@@ -78,11 +78,20 @@ define network::interface (
       undef   => 'layer3+4',
       default => $bond_xmit_hash_policy,
     }
+
+    $real_vlanid = undef
+
   } elsif $real_type == 'vlan' {
+    $real_bond_lacp_rate = undef
+    $real_bond_miimon = undef
+    $real_bond_mode = undef
+    $real_bond_slaves = undef
+    $real_bond_xmit_hash_policy = undef
     $real_vlanid = $vlanid ? {
       undef   => Integer($name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2]),
       default => $vlanid,
     }
+
   } else {
     $real_bond_lacp_rate = undef
     $real_bond_miimon = undef
@@ -102,7 +111,7 @@ define network::interface (
     bond_mode             => $real_bond_mode,
     bond_slaves           => $real_bond_slaves,
     bond_xmit_hash_policy => $real_bond_xmit_hash_policy,
-    ipaddress             => $ipaddress,
+    ipaddress             => $real_ipaddress,
     mac                   => $mac,
     mtu                   => $mtu,
     parent                => $parent,
