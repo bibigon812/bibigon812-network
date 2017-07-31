@@ -80,7 +80,7 @@ define network::interface (
     }
   } elsif $real_type == 'vlan' {
     $real_vlanid = $vlanid ? {
-      undef   => $name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2],
+      undef   => Integer($name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2]),
       default => $vlanid,
     }
   } else {
