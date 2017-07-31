@@ -43,7 +43,7 @@
 # Copyright 2017 Your name here, unless otherwise noted.
 #
 class network (
-  String $interface_conf_dir,
+  String $interface_config_dir,
   Hash $interfaces,
 ) {
 
