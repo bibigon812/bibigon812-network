@@ -101,6 +101,11 @@ define network::interface (
     $real_vlanid = undef
   }
 
+  $real_ipaddress = $ipaddress ? {
+    undef   => undef,
+    default => any2array($ipaddress),
+  }
+
   network_interface {$name:
     ensure                => $ensure,
     type                  => $real_type,
