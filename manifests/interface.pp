@@ -88,7 +88,7 @@ define network::interface (
     $real_bond_slaves = undef
     $real_bond_xmit_hash_policy = undef
     $real_vlanid = $vlanid ? {
-      undef   => Integer($name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2]),
+      undef   => 0 + $name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2],
       default => $vlanid,
     }
 
