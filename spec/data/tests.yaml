@@ -1,4 +1,4 @@
 ---
-network::network_manager:
-  ensure: running
-  enable: true
+network::interface_conf_dir: /etc/sysconfig/network-scripts
+network::network_manager::enable: true
+network::network_manager::ensure: running
