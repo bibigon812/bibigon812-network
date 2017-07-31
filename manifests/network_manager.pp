@@ -1,6 +1,9 @@
+#
+#
+#
 class network::network_manager (
-  Enum['running', 'stopped', 'masked'] $ensure,
   Boolean $enable,
+  Enum['running', 'stopped', 'masked'] $ensure,
 ) {
 
   service { 'NetworkManager':
