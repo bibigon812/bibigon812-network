@@ -20,7 +20,7 @@ define network::interface::config_file (
   Optional[Enum['layer2', 'layer3+4']]
   $bond_xmit_hash_policy = undef,
 
-  Optional[Array[String]]
+  Variant[Array[String], String, Undef]
   $ipaddress = undef,
 
   Optional[String]
@@ -41,7 +41,7 @@ define network::interface::config_file (
 
   $env = $::environment
 
-  file {$name:
+  file {"${network::interface_config_dir}/ifcfg-${name}":
     content => template('network/RedHat/ifcfg.erb')
   }
 

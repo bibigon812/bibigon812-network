@@ -23,7 +23,7 @@ define network::interface (
   Optional[Enum['layer2', 'layer3+4']]
   $bond_xmit_hash_policy = undef,
 
-  Optional[Array[String]]
+  Variant[Array[String], String, Undef]
   $ipaddress = undef,
 
   Optional[String]
@@ -58,7 +58,7 @@ define network::interface (
     vlanid                => $vlanid,
   }
 
-  network::interface::config_file {"/etc/sysconfig/network-scripts/ifcfg-${name}":
+  network::interface::config_file {$name:
     ensure                => Network_interface[$name]['ensure'],
     type                  => Network_interface[$name]['type'],
     bond_lacp_rate        => Network_interface[$name]['bond_lacp_rate'],
