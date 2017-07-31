@@ -1,0 +1,13 @@
+#
+# Managed by Puppet in the <%= @env %> environment
+#
+BOOTPROTO=none
+<%- unless @name.nil? -%>
+DEVICE=<%= @name %>
+<%- end -%>
+<% unless @mac.nil? -%>
+MACADDR=<%= @mac %>
+<%- end -%>
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
