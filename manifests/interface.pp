@@ -42,36 +42,88 @@ define network::interface (
   $vlanid = undef,
 ) {
 
+  $real_type = $type ? {
+    undef   => $name ? {
+      /\Abond\d+\Z/  => 'bond',
+      /\Avlan\d+\Z/  => 'vlan',
+      /\A\w+\.\d+\Z/ => 'vlan',
+      /\Alo\Z/       => 'loopback',
+      default        => 'hw',
+    },
+    default => $type,
+  }
+
+  if $real_type == 'bond' {
+    $real_bond_lacp_rate = $bond_lacp_rate ? {
+      undef   => 'slow',
+      default => $bond_lacp_rate,
+    }
+
+    $real_bond_miimon = $bond_miimon ? {
+      undef   => 100,
+      default => $bond_miimon,
+    }
+
+    $real_bond_mode = $bond_mode ? {
+      undef   => '802.3ad',
+      default => $bond_mode,
+    }
+
+    $real_bond_slaves = $bond_slaves ? {
+      undef   => [],
+      default => $bond_slaves,
+    }
+
+    $real_bond_xmit_hash_policy = $bond_xmit_hash_policy ? {
+      undef   => 'layer3+4',
+      default => $bond_xmit_hash_policy,
+    }
+  } elsif $real_type == 'vlan' {
+    $real_vlanid = $vlanid ? {
+      undef   => $name.match(/\A(\w+\.|vlan)(\d+)\Z/)[2],
+      default => $vlanid,
+    }
+  } else {
+    $real_bond_lacp_rate = undef
+    $real_bond_miimon = undef
+    $real_bond_mode = undef
+    $real_bond_slaves = undef
+    $real_bond_xmit_hash_policy = undef
+    $real_vlanid = undef
+  }
+
+  $real_ipaddress = any2array($ipaddress)
+
   network_interface {$name:
     ensure                => $ensure,
-    type                  => $type,
-    bond_lacp_rate        => $bond_lacp_rate,
-    bond_miimon           => $bond_miimon,
-    bond_mode             => $bond_mode,
-    bond_slaves           => $bond_slaves,
-    bond_xmit_hash_policy => $bond_xmit_hash_policy,
+    type                  => $real_type,
+    bond_lacp_rate        => $real_bond_lacp_rate,
+    bond_miimon           => $real_bond_miimon,
+    bond_mode             => $real_bond_mode,
+    bond_slaves           => $real_bond_slaves,
+    bond_xmit_hash_policy => $real_bond_xmit_hash_policy,
     ipaddress             => $ipaddress,
     mac                   => $mac,
     mtu                   => $mtu,
     parent                => $parent,
     state                 => $state,
-    vlanid                => $vlanid,
+    vlanid                => $real_vlanid,
   }
 
   network::interface::config_file {$name:
-    ensure                => Network_interface[$name]['ensure'],
-    type                  => Network_interface[$name]['type'],
-    bond_lacp_rate        => Network_interface[$name]['bond_lacp_rate'],
-    bond_miimon           => Network_interface[$name]['bond_miimon'],
-    bond_mode             => Network_interface[$name]['bond_mode'],
-    bond_slaves           => Network_interface[$name]['bond_slaves'],
-    bond_xmit_hash_policy => Network_interface[$name]['bond_xmit_hash_policy'],
-    ipaddress             => Network_interface[$name]['ipaddress'],
-    mac                   => Network_interface[$name]['mac'],
-    mtu                   => Network_interface[$name]['mtu'],
-    parent                => Network_interface[$name]['parent'],
-    state                 => Network_interface[$name]['state'],
-    vlanid                => Network_interface[$name]['vlanid'],
+    ensure                => $ensure,
+    type                  => $real_type,
+    bond_lacp_rate        => $real_bond_lacp_rate,
+    bond_miimon           => $real_bond_miimon,
+    bond_mode             => $real_bond_mode,
+    bond_slaves           => $real_bond_slaves,
+    bond_xmit_hash_policy => $real_bond_xmit_hash_policy,
+    ipaddress             => $real_ipaddress,
+    mac                   => $mac,
+    mtu                   => $mtu,
+    parent                => $parent,
+    state                 => $state,
+    vlanid                => $real_vlanid,
     subscribe             => Network_interface[$name],
   }
 
