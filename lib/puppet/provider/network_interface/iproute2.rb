@@ -345,6 +345,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_lacp_rate=(value)
+    return unless self.type == :bond
+
     state = self.state
     self.state = :down if state == :up
 
@@ -364,6 +366,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_miimon=(value)
+    return unless self.type == :bond
+
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/miimon", value.to_s)
     rescue Exception => e
@@ -378,6 +382,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_mode=(value)
+    return unless self.type == :bond
+
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/mode", value.to_s)
     rescue Exception => e
@@ -392,6 +398,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_slaves=(value)
+    return unless self.type == :bond
+
     state = self.state
     self.state = :down if state == :up
     sync_bond_slaves(@property_hash[:name], self.bond_slaves, value)
@@ -404,6 +412,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_xmit_hash_policy=(value)
+    return unless self.type == :bond
+
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/xmit_hash_policy", value.to_s)
     rescue Exception => e
@@ -418,7 +428,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def vlanid=(value)
-    return if value.nil?
+    return unless self.type == :vlan
+
     ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
     @property_hash[:vlanid] = value
   end
