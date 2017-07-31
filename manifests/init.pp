@@ -42,9 +42,17 @@
 #
 # Copyright 2017 Your name here, unless otherwise noted.
 #
-class network {
+class network (
+  String $interface_conf_dir,
+  Hash $interfaces,
+) {
 
   contain network::network_manager
-  # contain network::interfaces
+
+  $interfaces.each |String $interface_name, Hash $interface_params| {
+    network::interface {$interface_name:
+      * => $interface_params,
+    }
+  }
 
 }
