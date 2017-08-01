@@ -22,8 +22,11 @@ ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
 <% if @type == 'bond' -%>
-TYPE=bond
-BOND_OPTS="<% unless @bond_mode.nil? %>mode=<%= @bond_mode %><% end %><% unless @bond_miimon.nil? %> miimon=<%= @bond_miimon %><% end %><% unless @bond_lacp_rate.nil? %> lacp_rate=<%= @bond_lacp_rate %><% end %><% unless @bond_xmit_hash_policy.nil? %> xmit_hash_policy=<%= @bond_xmit_hash_policy %><% end %>"
+BONDING_OPTS="<% unless @bond_mode.nil? %>mode=<%= @bond_mode %><% end %><% unless @bond_miimon.nil? %> miimon=<%= @bond_miimon %><% end %><% unless @bond_lacp_rate.nil? %> lacp_rate=<%= @bond_lacp_rate %><% end %><% unless @bond_xmit_hash_policy.nil? %> xmit_hash_policy=<%= @bond_xmit_hash_policy %><% end %>"
+TYPE=Bond
 <% elsif @type == 'vlan' -%>
 VLAN=yes
+TYPE=Ethernet
+<% elsif @type == 'hw' -%>
+TYPE=Ethernet
 <% end -%>

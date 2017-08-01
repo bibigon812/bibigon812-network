@@ -45,6 +45,7 @@ PREFIX=24
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
+TYPE=Ethernet
       OES
         )
     end
@@ -77,8 +78,8 @@ PREFIX=24
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
-TYPE=bond
 BOND_OPTS="mode=802.3ad miimon=100 lacp_rate=fast xmit_hash_policy=layer2"
+TYPE=Bond
 OES
         )
     end
@@ -108,6 +109,7 @@ ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
 VLAN=yes
+TYPE=Ethernet
       OES
       )
     end
