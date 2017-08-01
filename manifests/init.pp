@@ -62,7 +62,8 @@ class network (
     }
   ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
-      * => $interface_params,
+      *                    => $interface_params,
+      interface_config_dir => $interface_config_dir,
     }
   }
 

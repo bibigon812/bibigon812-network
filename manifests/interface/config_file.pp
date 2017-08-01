@@ -40,16 +40,15 @@ define network::interface::config_file (
 
   Optional[Integer[1,4095]]
   $vlanid = undef,
+
+  String
+  $interface_config_dir,
 ) {
 
   $env = $::environment
   $interface_name = $name
 
-  $ipaddress.each |String $ip| {
-
-  }
-
-  if $ipaddress[0] {
+  if $ipaddress {
     $ipaddr_prefix = split($ipaddress[0], '/')
     $ipaddr = $ipaddr_prefix[0]
     $prefix = $ipaddr_prefix[1]
@@ -58,8 +57,8 @@ define network::interface::config_file (
     $prefix = undef
   }
 
-  file {"${network::interface_config_dir}/ifcfg-${name}":
-    content => template("network/${facts['os']['family']}/ifcfg.erb")
+  file {"${interface_config_dir}/ifcfg-${name}":
+    content => template("network/${facts['os']['family']}/ifcfg.erb"),
   }
 
 }

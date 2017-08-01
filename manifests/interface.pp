@@ -43,6 +43,9 @@ define network::interface (
 
   Optional[Integer[1,4095]]
   $vlanid = undef,
+
+  String
+  $interface_config_dir,
 ) {
 
   $real_type = $type ? {
@@ -140,6 +143,7 @@ define network::interface (
     parent                => $parent,
     state                 => $state,
     vlanid                => $real_vlanid,
+    interface_config_dir  => $interface_config_dir,
     require               => Network_interface[$name],
   }
 
