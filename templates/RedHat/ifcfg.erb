@@ -2,24 +2,28 @@
 # Managed by Puppet in the <%= @env %> environment
 #
 BOOTPROTO=none
-<%- unless @interface_name.nil? -%>
+<% unless @interface_name.nil? -%>
 DEVICE=<%= @interface_name %>
-<%- end -%>
-<%- unless @ipaddr.nil? -%>
+<% end -%>
+<% unless @ipaddr.nil? -%>
 IPADDR=<%= @ipaddr %>
-<%- end -%>
-<%- unless @prefix.nil? -%>
+<% end -%>
+<% unless @prefix.nil? -%>
 PREFIX=<%= @prefix %>
-<%- end -%>
-<%- unless @mac.nil? -%>
+<% end -%>
+<% unless @mac.nil? -%>
 MACADDR=<%= @mac %>
-<%- end -%>
+<% end -%>
+<% unless @master.nil? -%>
+SLAVE=yes
+MASTER=<%= @master %>
+<% end -%>
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
-<%- if @type == 'bond' -%>
+<% if @type == 'bond' -%>
 TYPE=bond
 BOND_OPTS="<% unless @bond_mode.nil? %>mode=<%= @bond_mode %><% end %><% unless @bond_miimon.nil? %> miimon=<%= @bond_miimon %><% end %><% unless @bond_lacp_rate.nil? %> lecp_rate=<%= @bond_lacp_rate %><% end %><% unless @bond_xmit_hash_policy.nil? %> xmit_hash_policy=<%= @bond_xmit_hash_policy %><% end %>"
-<%- elsif @type == 'vlan' -%>
+<% elsif @type == 'vlan' -%>
 VLAN=yes
-<%- end -%>
+<% end -%>
