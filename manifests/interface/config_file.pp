@@ -48,13 +48,13 @@ define network::interface::config_file (
   $env = $::environment
   $interface_name = $name
 
-  if $ipaddress {
+  if empty($ipaddress) {
+    $ipaddr = undef
+    $prefix = undef
+  } else {
     $ipaddr_prefix = split($ipaddress[0], '/')
     $ipaddr = $ipaddr_prefix[0]
     $prefix = $ipaddr_prefix[1]
-  } else {
-    $ipaddr = undef
-    $prefix = undef
   }
 
   file {"${interface_config_dir}/ifcfg-${name}":
