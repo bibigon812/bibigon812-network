@@ -23,7 +23,7 @@ define network::interface (
   Optional[Enum['layer2', 'layer3+4']]
   $bond_xmit_hash_policy = undef,
 
-  Variant[Array[String], String, Undef]
+  Optional[Variant[Array[String], String]]
   $ipaddress = undef,
 
   Optional[String]
@@ -102,7 +102,7 @@ define network::interface (
   }
 
   $real_ipaddress = $ipaddress ? {
-    undef   => undef,
+    undef   => [],
     default => any2array($ipaddress),
   }
 
@@ -136,7 +136,7 @@ define network::interface (
     parent                => $parent,
     state                 => $state,
     vlanid                => $real_vlanid,
-    subscribe             => Network_interface[$name],
+    require               => Network_interface[$name],
   }
 
 }

@@ -2,10 +2,16 @@
 # Managed by Puppet in the <%= @env %> environment
 #
 BOOTPROTO=none
-<%- unless @name.nil? -%>
-DEVICE=<%= @name %>
+<%- unless @interface_name.nil? -%>
+DEVICE=<%= @interface_name %>
 <%- end -%>
-<% unless @mac.nil? -%>
+<%- unless @ipaddr.nil? -%>
+IPADDR=<%= @ipaddr %>
+<%- end -%>
+<%- unless @prefix.nil? -%>
+PREFIX=<%= @prefix %>
+<%- end -%>
+<%- unless @mac.nil? -%>
 MACADDR=<%= @mac %>
 <%- end -%>
 ONBOOT=yes

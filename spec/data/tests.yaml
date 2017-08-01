@@ -5,4 +5,5 @@ network::network_manager::ensure: running
 network::interfaces:
   eth0: {}
   bond0: {}
-  bond0.100: {}
+  bond0.100:
+    ipaddress: 10.0.0.1/24
