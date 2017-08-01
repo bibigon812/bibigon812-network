@@ -5,7 +5,7 @@ define network::interface (
   Enum['absent', 'present']
   $ensure = 'present',
 
-  Optional[Enum['bond', 'hw', 'vlan']]
+  Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
   $type = undef,
 
   Optional[Enum['fast', 'slow']]

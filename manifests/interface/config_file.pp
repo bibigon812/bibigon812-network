@@ -2,7 +2,7 @@ define network::interface::config_file (
   Enum['absent', 'present']
   $ensure = 'present',
 
-  Optional[Enum['bond', 'hw', 'vlan']]
+  Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
   $type = undef,
 
   Optional[Enum['fast', 'slow']]
