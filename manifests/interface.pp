@@ -17,7 +17,7 @@ define network::interface (
   Optional[Enum['balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb']]
   $bond_mode = undef,
 
-  Optional[Array[String]]
+  Optional[Variant[Array[String], String]]
   $bond_slaves = undef,
 
   Optional[Enum['layer2', 'layer3+4']]
@@ -71,7 +71,7 @@ define network::interface (
 
     $real_bond_slaves = $bond_slaves ? {
       undef   => [],
-      default => $bond_slaves,
+      default => any2array($bond_slaves),
     }
 
     $real_bond_xmit_hash_policy = $bond_xmit_hash_policy ? {
