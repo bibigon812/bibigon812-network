@@ -40,7 +40,7 @@
 # Copyright
 # ---------
 #
-# Copyright 2017 Your name here, unless otherwise noted.
+# Copyright 2017 Dmitriy Yakovlev, unless otherwise noted.
 #
 class network (
   String $interface_config_dir,
@@ -49,7 +49,18 @@ class network (
 
   contain network::network_manager
 
-  $interfaces.each |String $interface_name, Hash $interface_params| {
+  merge($interfaces,
+    $interfaces.reduce({}) |Hash $slaves, Tuple[String, Hash]$value| {
+      $interface_name = $value[0]
+      if $value[1]['bond_slaves'] {
+        merge($slaves, any2array($value[1]['bond_slaves']).reduce({}) |Hash $memo, String $value| {
+          merge($memo, { $value => { master => $interface_name } })
+        })
+      } else {
+        $slaves
+      }
+    }
+  ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
       * => $interface_params,
     }

@@ -29,6 +29,9 @@ define network::interface (
   Optional[String]
   $mac = undef,
 
+  Optional[String]
+  $master = undef,
+
   Optional[Integer[1,9000]]
   $mtu = undef,
 
@@ -132,6 +135,7 @@ define network::interface (
     bond_xmit_hash_policy => $real_bond_xmit_hash_policy,
     ipaddress             => $real_ipaddress,
     mac                   => $mac,
+    master                => $master,
     mtu                   => $mtu,
     parent                => $parent,
     state                 => $state,

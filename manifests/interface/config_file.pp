@@ -26,6 +26,9 @@ define network::interface::config_file (
   Optional[String]
   $mac = undef,
 
+  Optional[String]
+  $master = undef,
+
   Optional[Integer[1,9000]]
   $mtu = undef,
 
@@ -56,7 +59,7 @@ define network::interface::config_file (
   }
 
   file {"${network::interface_config_dir}/ifcfg-${name}":
-    content => template('network/RedHat/ifcfg.erb')
+    content => template("network/${facts['os']['family']}/ifcfg.erb")
   }
 
 }
