@@ -6,4 +6,7 @@ network::interfaces:
   bond0:
     bond_slaves: eth0
   bond0.100:
-    ipaddress: 10.0.0.1/24
+    ipaddress:
+      - 10.0.0.1/24
+      - 172.16.0.1/24
+      - 192.168.0.1/24

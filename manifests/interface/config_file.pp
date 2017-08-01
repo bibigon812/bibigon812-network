@@ -55,8 +55,29 @@ define network::interface::config_file (
     $ipaddr_prefix = split($ipaddress[0], '/')
     $ipaddr = $ipaddr_prefix[0]
     $prefix = $ipaddr_prefix[1]
+
+    # Add alias configs
+    $ipaddress[1,-1].reduce({}) |Hash $memo, String $value| {
+      if empty($memo) {
+        $index = 1
+      } else {
+        $index = keys($memo)[-1] + 1
+      }
+      $ipaddr_prefix = split($value, '/')
+      $ipaddr = $ipaddr_prefix[0]
+      $prefix = $ipaddr_prefix[1]
+      merge($memo, { $index => { ipaddr => $ipaddr, prefix => $prefix } })
+    }.each |Integer $index, Hash $ipaddress| {
+      $ipaddr = $ipaddress['ipaddr']
+      $prefix = $ipaddress['prefix']
+
+      file {"${interface_config_dir}/ifcfg-${name}:${index}":
+        content => template("network/${facts['os']['family']}/ifcfg-alias.erb")
+      }
+    }
   }
 
+  # Add interface configs
   file {"${interface_config_dir}/ifcfg-${name}":
     content => template("network/${facts['os']['family']}/ifcfg.erb"),
   }

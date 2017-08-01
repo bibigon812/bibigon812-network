@@ -60,7 +60,7 @@ TYPE=Ethernet
           bond_mode: '802.3ad',
           bond_slaves: [:eth1],
           bond_xmit_hash_policy: :layer2,
-          ipaddress: %w{10.0.0.1/24},
+          ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
           interface_config_dir: '/etc/sysconfig/network-scripts',
           type: :bond,
       }
@@ -82,6 +82,38 @@ BONDING_OPTS="mode=802.3ad miimon=100 lacp_rate=fast xmit_hash_policy=layer2"
 TYPE=Bond
 OES
         )
+    end
+
+    it do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:1').with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+BOOTPROTO=none
+DEVICE=bond0:1
+IPADDR=172.16.0.1
+PREFIX=24
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
+OES
+      )
+    end
+
+    it do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:2').with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+BOOTPROTO=none
+DEVICE=bond0:2
+IPADDR=192.168.0.1
+PREFIX=24
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
+OES
+      )
     end
   end
 

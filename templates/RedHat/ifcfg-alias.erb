@@ -1,0 +1,16 @@
+#
+# Managed by Puppet in the <%= @env %> environment
+#
+BOOTPROTO=none
+<% unless @interface_name.nil? -%>
+DEVICE=<%= "#{@interface_name}:#{@index}" %>
+<% end -%>
+<% unless @ipaddr.nil? -%>
+IPADDR=<%= @ipaddr %>
+<% end -%>
+<% unless @prefix.nil? -%>
+PREFIX=<%= @prefix %>
+<% end -%>
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
