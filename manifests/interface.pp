@@ -107,9 +107,17 @@ define network::interface (
     $real_vlanid = undef
   }
 
-  $real_ipaddress = $ipaddress ? {
+  $pre_ipaddress = $ipaddress ? {
     undef   => [],
     default => any2array($ipaddress),
+  }
+
+  if $real_type == 'loopback' {
+    if ! ('127.0.0.1/8' in $pre_ipaddress) {
+      $real_ipaddress = concat(['127.0.0.1/8'], $pre_ipaddress)
+    }
+  } else {
+    $real_ipaddress = $pre_ipaddress
   }
 
   network_interface {$name:

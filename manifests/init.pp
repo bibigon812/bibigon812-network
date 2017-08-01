@@ -49,6 +49,7 @@ class network (
 
   contain network::network_manager
 
+  # Find bond_slaves and add master to them
   merge($interfaces,
     $interfaces.reduce({}) |Hash $slaves, Tuple[String, Hash]$value| {
       $interface_name = $value[0]

@@ -142,9 +142,51 @@ USERCTL=no
 NM_CONTROLLED=no
 VLAN=yes
 TYPE=Ethernet
-      OES
+OES
       )
     end
   end
 
+  context 'lo' do
+    let(:title) { 'lo' }
+    let(:params) do
+      {
+          ipaddress: %w{127.0.0.1/8 10.0.0.1/32},
+          interface_config_dir: '/etc/sysconfig/network-scripts',
+          type: :loopback,
+      }
+    end
+
+    it do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-lo').with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+BOOTPROTO=none
+DEVICE=lo
+IPADDR=127.0.0.1
+PREFIX=8
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
+OES
+      )
+    end
+
+    it do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-lo:1').with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+BOOTPROTO=none
+DEVICE=lo:1
+IPADDR=10.0.0.1
+PREFIX=32
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
+OES
+      )
+    end
+  end
 end

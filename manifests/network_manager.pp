@@ -3,7 +3,7 @@
 #
 class network::network_manager (
   Boolean $enable,
-  Enum['running', 'stopped', 'masked'] $ensure,
+  Enum['running', 'stopped'] $ensure,
 ) {
 
   service { 'NetworkManager':

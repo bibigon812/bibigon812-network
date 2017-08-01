@@ -145,7 +145,6 @@ Puppet::Type.newtype(:network_interface) do
 
   newproperty(:mtu) do
     desc 'Specifies the maximum transmission unit.'
-    defaultto 1500
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
