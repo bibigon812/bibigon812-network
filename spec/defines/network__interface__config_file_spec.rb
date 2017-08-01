@@ -78,7 +78,7 @@ PREFIX=24
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
-BOND_OPTS="mode=802.3ad miimon=100 lacp_rate=fast xmit_hash_policy=layer2"
+BONDING_OPTS="mode=802.3ad miimon=100 lacp_rate=fast xmit_hash_policy=layer2"
 TYPE=Bond
 OES
         )
