@@ -1,7 +1,10 @@
 ---
-:backends:
-  - yaml
-:hierarchy:
-  - tests
-:yaml:
-  :datadir: 'spec/data'
+version: 5
+defaults:
+  datadir: spec/data
+  data_hash: yaml_data
+hierarchy:
+  - name: OS family name
+    path: "osfamily/%{::facts.os.family}.yaml"
+  - name: common
+    path: common.yaml

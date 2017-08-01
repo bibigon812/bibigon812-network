@@ -1,9 +1,9 @@
 ---
-network::interface_config_dir: /etc/sysconfig/network-scripts
 network::network_manager::enable: true
 network::network_manager::ensure: running
 network::interfaces:
   eth0: {}
-  bond0: {}
+  bond0:
+    bond_slaves: eth0
   bond0.100:
     ipaddress: 10.0.0.1/24
