@@ -76,6 +76,18 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:bond_slaves, array_matching: :all) do
     desc 'Specifies a list of the bonding slaves.'
 
+    def insync?(is)
+      is.each do |value|
+        return false unless @should.include?(value)
+      end
+
+      @should.each do |value|
+        return false unless is.include?(value)
+      end
+
+      true
+    end
+
     defaultto {
       if resource[:name].include?('bond') and not resource[:name].include?('.')
         []
@@ -108,6 +120,18 @@ Puppet::Type.newtype(:network_interface) do
         fail 'Invalid value \'%{value}\'. It is not a IP address.' % { value: value }
       end
       fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value } unless value.include?('/')
+    end
+
+    def insync?(is)
+      is.each do |value|
+        return false unless @should.include?(value)
+      end
+
+      @should.each do |value|
+        return false unless is.include?(value)
+      end
+
+      true
     end
 
     defaultto []
