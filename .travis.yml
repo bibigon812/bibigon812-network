@@ -1,0 +1,10 @@
+---
+language: ruby
+sudo: required
+cache: bundler
+services:
+  - docker
+script:
+  - bundle exec rake release_checks
+rvm:
+  - 2.4.1
