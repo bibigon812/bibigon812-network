@@ -2,6 +2,7 @@ source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 group :tests do
   gem 'puppetlabs_spec_helper'
+  gem 'metadata-json-lint'
 end
 
 group :system_tests do
