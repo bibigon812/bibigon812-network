@@ -83,13 +83,15 @@ define network::interface::config (
       $prefix = $ipaddress['prefix']
 
       file {"${interface_config_dir}/ifcfg-${name}:${index}":
-        content => template("network/${facts['os']['family']}/ifcfg-alias.erb")
+        ensure  => $ensure,
+        content => template("network/${facts['os']['family']}/ifcfg-alias.erb"),
       }
     }
   }
 
   # Add interface configs
   file {"${interface_config_dir}/ifcfg-${name}":
+    ensure  => $ensure,
     content => template("network/${facts['os']['family']}/ifcfg.erb"),
   }
 
