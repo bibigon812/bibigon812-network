@@ -39,6 +39,16 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
     inet 172.16.33.103/24 brd 172.16.32.255 scope global eth1
        valid_lft forever preferred_lft forever
+7: vlan200@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP
+    link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.0.1/24 scope global vlan100
+       valid_lft forever preferred_lft forever
+    inet 172.16.0.1/24 scope global vlan100
+       valid_lft forever preferred_lft forever
+    inet 192.168.0.1/24 scope global vlan100
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a00:27ff:fe9c:7649/64 scope link
+       valid_lft forever preferred_lft forever
 EOS
   end
 
@@ -53,7 +63,7 @@ EOS
     end
 
     it 'should return resources' do
-      expect(described_class.instances.size).to eq(6)
+      expect(described_class.instances.size).to eq(7)
     end
 
     it 'should return the resource eth0' do
@@ -148,6 +158,23 @@ EOS
             vlanid:    100,
             type:      :vlan,
         }
+      )
+    end
+
+    it 'should return the resource eth0' do
+      expect(described_class.instances[6].instance_variable_get('@property_hash')).to eq(
+          {
+              ensure:    :present,
+              ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
+              mac:       '08:00:27:9c:76:49',
+              mtu:       1500,
+              name:      'vlan200',
+              parent:    'bond0',
+              provider:  :iproute2,
+              state:     :up,
+              vlanid:    200,
+              type:      :vlan,
+          }
       )
     end
   end

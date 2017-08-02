@@ -182,7 +182,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
   def self.parse_vlan_id(name)
     if name.include?('vlan')
-      Integer(resource[:name].sub(/\Avlan/, ''))
+      Integer(name.sub(/\Avlan/, ''))
     else
       Integer(name.split('.').last)
     end
