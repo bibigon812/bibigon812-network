@@ -27,6 +27,9 @@ TYPE=Bond
 <% elsif @type == 'vlan' -%>
 VLAN=yes
 TYPE=Ethernet
+<% unless @parent.nil? -%>
+PHYSDEV=<%= @parent %>
+<% end -%>
 <% elsif @type == 'hw' -%>
 TYPE=Ethernet
 <% end -%>

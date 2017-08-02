@@ -147,6 +147,38 @@ OES
     end
   end
 
+  context 'vlan100' do
+    let(:title) { 'vlan100' }
+    let(:params) do
+      {
+          ipaddress: %w{10.0.0.1/24},
+          interface_config_dir: '/etc/sysconfig/network-scripts',
+          parent: :bond0,
+          type: :vlan,
+          vlanid: 100,
+      }
+    end
+
+    it do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-vlan100').with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+BOOTPROTO=none
+DEVICE=vlan100
+IPADDR=10.0.0.1
+PREFIX=24
+ONBOOT=yes
+USERCTL=no
+NM_CONTROLLED=no
+VLAN=yes
+TYPE=Ethernet
+PHYSDEV=bond0
+OES
+      )
+    end
+  end
+
   context 'lo' do
     let(:title) { 'lo' }
     let(:params) do
