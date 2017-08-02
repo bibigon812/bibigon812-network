@@ -1,35 +1,43 @@
 # Class: network
 # ===========================
 #
-# Full description of class network here.
+# This class manages network interfaces.
 #
 # Parameters
 # ----------
 #
-# Document parameters here.
+# * `interface_config_dir`
+# CentOs => '/etc/sysconfig/network-scripts'
 #
-# * `sample parameter`
-# Explanation of what this parameter affects and what it defaults to.
-# e.g. "Specify one or more upstream ntp servers as an array."
-#
-# Variables
-# ----------
-#
-# Here you should define a list of variables that this module would require.
-#
-# * `sample variable`
-#  Explanation of how this variable affects the function of this class and if
-#  it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#  External Node Classifier as a comma separated list of hostnames." (Note,
-#  global variables should be avoided in favor of class parameters as
-#  of Puppet 2.6.)
+# * `interfaces`
+# Hash of network interface parameters. Defaults to `{}`
 #
 # Examples
 # --------
 #
 # @example
 #    class { 'network':
-#      servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
+#      interface_config_dir => '/etc/sysconfig/network-scripts',
+#      interfaces => {
+#        lo => {
+#          ipaddress => [
+#            '10.0.0.1/32',
+#            '10.255.255.1/32',
+#          ],
+#        },
+#        bond0 => {
+#          bond_slaves => [
+#            eth0,
+#            eth1,
+#          ],
+#        },
+#        bond0.100 => {
+#          ipaddress => [
+#            '192.168.1.1/24',
+#            '192.168.2.1/24',
+#          ],
+#        },
+#      },
 #    }
 #
 # Authors
@@ -43,11 +51,18 @@
 # Copyright 2017 Dmitriy Yakovlev, unless otherwise noted.
 #
 class network (
-  String $interface_config_dir,
-  Hash $interfaces,
+  String
+  $interface_config_dir,
+
+  Hash
+  $interfaces,
 ) {
 
   contain network::network_manager
+
+  Network::Interface::Config {
+    interface_config_dir => $interface_config_dir,
+  }
 
   # Find bond_slaves and add master to them
   merge($interfaces,
@@ -63,9 +78,7 @@ class network (
     }
   ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
-      *                    => $interface_params,
-      interface_config_dir => $interface_config_dir,
+      * => $interface_params,
     }
   }
-
 }

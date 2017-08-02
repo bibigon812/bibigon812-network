@@ -1,5 +1,13 @@
 #
+# Authors
+# -------
 #
+# Dmitriy Yakovlev <yak0vl3v@gmail.com>
+#
+# Copyright
+# ---------
+#
+# Copyright 2017 Dmitriy Yakovlev, unless otherwise noted.
 #
 define network::interface (
   Enum['absent', 'present']
@@ -43,9 +51,6 @@ define network::interface (
 
   Optional[Integer[1,4095]]
   $vlanid = undef,
-
-  String
-  $interface_config_dir,
 ) {
 
   $real_type = $type ? {
@@ -112,6 +117,7 @@ define network::interface (
     default => any2array($ipaddress),
   }
 
+  # Add the default ip of the loopback interface if it's absent
   if $real_type == 'loopback' {
     if ! ('127.0.0.1/8' in $pre_ipaddress) {
       $real_ipaddress = concat(['127.0.0.1/8'], $pre_ipaddress)
@@ -120,6 +126,7 @@ define network::interface (
     $real_ipaddress = $pre_ipaddress
   }
 
+  # Create the resource type
   network_interface {$name:
     ensure                => $ensure,
     type                  => $real_type,
@@ -136,7 +143,8 @@ define network::interface (
     vlanid                => $real_vlanid,
   }
 
-  network::interface::config_file {$name:
+  # Create configuration files
+  network::interface::config {$name:
     ensure                => $ensure,
     type                  => $real_type,
     bond_lacp_rate        => $real_bond_lacp_rate,
@@ -151,8 +159,6 @@ define network::interface (
     parent                => $parent,
     state                 => $state,
     vlanid                => $real_vlanid,
-    interface_config_dir  => $interface_config_dir,
     require               => Network_interface[$name],
   }
-
 }
