@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'network::interface::config_file' do
+describe 'network::interface::config' do
   let(:facts) do
     {
         os: {

@@ -1,6 +1,23 @@
-define network::interface::config_file (
+#
+# Authors
+# -------
+#
+# Dmitriy Yakovlev <yak0vl3v@gmail.com>
+#
+# Copyright
+# ---------
+#
+# Copyright 2017 Dmitriy Yakovlev, unless otherwise noted.
+#
+define network::interface::config (
+  String
+  $interface_config_dir,
+
   Enum['absent', 'present']
   $ensure = 'present',
+
+  Enum['down', 'up']
+  $state = 'up',
 
   Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
   $type = undef,
@@ -35,14 +52,8 @@ define network::interface::config_file (
   Optional[String]
   $parent = undef,
 
-  Enum['down', 'up']
-  $state = 'up',
-
   Optional[Integer[1,4095]]
   $vlanid = undef,
-
-  String
-  $interface_config_dir,
 ) {
 
   $env = $::environment
