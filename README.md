@@ -10,6 +10,7 @@
     * [Beginning with network](#beginning-with-network)
 1. [Usage - Configuration options and additional functionality](#usage)
 1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+1. [TODO](#todo)
 
 ## Description
 
@@ -163,10 +164,10 @@ Defaults to `100`.
 when available, to generate the hash. Defaults to `layer3+4`.
 - `ipaddress`. Specifies a list of IP addresses. Defaults to `[]`.
 - `mac`. Specifies a MAC address.
-- `mtu`. Specifies the maximum transmission unit. Defaults to `1500`.
+- `mtu`. Specifies the maximum transmission unit.
 - `parent`. Specifies a parent interface.
 - `state`. State of this interface. Can be `up` and `down`. Defaults to `up`.
-- `tag`. Vlan ID.
+- `vlanid`. Vlan ID.
 
 ## TODO
 
