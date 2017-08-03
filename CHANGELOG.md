@@ -1,3 +1,9 @@
+## [0.1.1] - 2017-09-03
+
+### Updated
+
+- the alias file management
+
 ## [0.1.0] - 2017-09-02
 
 ### Added
