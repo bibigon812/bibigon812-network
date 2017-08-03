@@ -67,24 +67,21 @@ define network::interface::config (
     $ipaddr = $ipaddr_prefix[0]
     $prefix = $ipaddr_prefix[1]
 
-    # Add alias configs
-    $ipaddress[1,-1].reduce({}) |Hash $memo, String $value| {
-      if empty($memo) {
-        $index = 1
-      } else {
-        $index = keys($memo)[-1] + 1
-      }
-      $ipaddr_prefix = split($value, '/')
-      $ipaddr = $ipaddr_prefix[0]
-      $prefix = $ipaddr_prefix[1]
-      merge($memo, { $index => { ipaddr => $ipaddr, prefix => $prefix } })
-    }.each |Integer $index, Hash $ipaddress| {
-      $ipaddr = $ipaddress['ipaddr']
-      $prefix = $ipaddress['prefix']
+    # aliases
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].each |Integer $index| {
+      if $ipaddress[$index] {
+        $ipaddr_prefix = split($ipaddress[$index], '/')
+        $ipaddr = $ipaddr_prefix[0]
+        $prefix = $ipaddr_prefix[1]
 
-      file {"${interface_config_dir}/ifcfg-${name}:${index}":
-        ensure  => $ensure,
-        content => template("network/${facts['os']['family']}/ifcfg-alias.erb"),
+        file {"${interface_config_dir}/ifcfg-${name}:${index}":
+          ensure  => $ensure,
+          content => template("network/${facts['os']['family']}/ifcfg-alias.erb"),
+        }
+      } else {
+        file {"${interface_config_dir}/ifcfg-${name}:${index}":
+          ensure => absent,
+        }
       }
     }
   }
