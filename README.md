@@ -24,7 +24,7 @@ after OS boots.
 
 ### Limitations
 
-* Manages alias files only for the ten ip address.
+* Manages alias files only for ten ip addresses.
 
 ### What network affects
 
