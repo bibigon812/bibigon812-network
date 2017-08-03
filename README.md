@@ -6,6 +6,7 @@
 
 1. [Description](#description)
 1. [Setup - The basics of getting started with network](#setup)
+    * [Limitations](#limitations)
     * [What network affects](#what-network-affects)
     * [Beginning with network](#beginning-with-network)
 1. [Usage - Configuration options and additional functionality](#usage)
@@ -20,6 +21,10 @@ placed in `/sys/class/net`. The other manages files needed to restore the state
 after OS boots.
 
 ## Setup
+
+### Limitations
+
+* Manages alias files only for the ten ip address.
 
 ### What network affects
 
