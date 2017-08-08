@@ -14,8 +14,10 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
     hash = get_provider_hash(prefix, metric)
 
     if hash.empty?
+      debug 'Not found a network_route for prefix %{prefix} with metric %{metric}' % {prefix: prefix, metric: metric}
       nil
     else
+      debug 'Found the network_route %{route}' % {route: hash.inspect}
       new(hash)
     end
   end
