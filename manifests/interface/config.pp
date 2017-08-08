@@ -11,7 +11,7 @@
 #
 define network::interface::config (
   String
-  $interface_config_dir,
+  $config_dir,
 
   Enum['absent', 'present']
   $ensure = 'present',
@@ -74,12 +74,12 @@ define network::interface::config (
         $ipaddr = $ipaddr_prefix[0]
         $prefix = $ipaddr_prefix[1]
 
-        file {"${interface_config_dir}/ifcfg-${name}:${index}":
+        file {"${config_dir}/ifcfg-${name}:${index}":
           ensure  => $ensure,
           content => template("network/${facts['os']['family']}/ifcfg-alias.erb"),
         }
       } else {
-        file {"${interface_config_dir}/ifcfg-${name}:${index}":
+        file {"${config_dir}/ifcfg-${name}:${index}":
           ensure => absent,
         }
       }
@@ -87,9 +87,8 @@ define network::interface::config (
   }
 
   # Add interface configs
-  file {"${interface_config_dir}/ifcfg-${name}":
+  file {"${config_dir}/ifcfg-${name}":
     ensure  => $ensure,
     content => template("network/${facts['os']['family']}/ifcfg.erb"),
   }
-
 }

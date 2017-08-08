@@ -3,6 +3,10 @@ lookup_options:
   network::interfaces:
     merge:
       strategy: deep
+  network::routes:
+      merge:
+        strategy: deep
 network::network_manager::enable: true
 network::network_manager::ensure: running
 network::interfaces: {}
+network::routes: {}

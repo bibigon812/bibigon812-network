@@ -27,7 +27,7 @@ describe 'network::interface::config' do
     let(:params) do
       {
           ipaddress: %w{10.0.0.1/24},
-          interface_config_dir: '/etc/sysconfig/network-scripts',
+          config_dir: '/etc/sysconfig/network-scripts',
           type: :hw,
       }
     end
@@ -61,7 +61,7 @@ TYPE=Ethernet
           bond_slaves: [:eth1],
           bond_xmit_hash_policy: :layer2,
           ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
-          interface_config_dir: '/etc/sysconfig/network-scripts',
+          config_dir: '/etc/sysconfig/network-scripts',
           type: :bond,
       }
     end
@@ -122,7 +122,7 @@ OES
     let(:params) do
       {
           ipaddress: %w{10.0.0.1/24},
-          interface_config_dir: '/etc/sysconfig/network-scripts',
+          config_dir: '/etc/sysconfig/network-scripts',
           type: :vlan,
           vlanid: 100,
       }
@@ -152,7 +152,7 @@ OES
     let(:params) do
       {
           ipaddress: %w{10.0.0.1/24},
-          interface_config_dir: '/etc/sysconfig/network-scripts',
+          config_dir: '/etc/sysconfig/network-scripts',
           parent: :bond0,
           type: :vlan,
           vlanid: 100,
@@ -184,7 +184,7 @@ OES
     let(:params) do
       {
           ipaddress: %w{127.0.0.1/8 10.0.0.1/32},
-          interface_config_dir: '/etc/sysconfig/network-scripts',
+          config_dir: '/etc/sysconfig/network-scripts',
           type: :loopback,
       }
     end

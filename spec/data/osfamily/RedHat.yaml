@@ -1,2 +1,2 @@
 ---
-network::interface_config_dir: /etc/sysconfig/network-scripts
+network::config_dir: /etc/sysconfig/network-scripts
