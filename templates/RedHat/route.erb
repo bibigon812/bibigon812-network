@@ -1,0 +1,13 @@
+#
+# Managed by Puppet in the <%= @env %> environment
+#
+<% @routes.each do |route| -%>
+<%= route['prefix'] -%>
+<% unless route['nexthop'].nil? -%>
+ via <%= route['nexthop'] -%>
+<% end -%>
+ dev <%= route['device'] -%>
+<% unless route['metric'].nil? -%>
+ metric <%= route['metric'] -%>
+<% end %>
+<% end %>
