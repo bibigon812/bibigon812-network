@@ -11,6 +11,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def self.instance(prefix, metric)
+    debug '[instance]'
     hash = get_provider_hash(prefix, metric)
 
     if hash.empty?
@@ -23,6 +24,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def self.get_provider_hash(prefix, metric)
+    debug '[get_provider_hash]'
     hash = {}
 
     if metric == 0
@@ -50,6 +52,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def self.prefetch(resources)
+    debug '[prefetch]'
     resources.each do |resource|
       if provider = instance(resource[:prefix], resource[:metric])
         resource.provider = provider
