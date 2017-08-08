@@ -53,7 +53,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
 
   def self.prefetch(resources)
     debug '[prefetch]'
-    resources.each do |resource|
+    resources.each do |title, resource|
       if provider = instance(resource[:prefix], resource[:metric])
         resource.provider = provider
       end

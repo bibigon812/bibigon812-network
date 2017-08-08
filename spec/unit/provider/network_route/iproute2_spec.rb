@@ -32,14 +32,6 @@ EOS
     end
   end
 
-  let(:resource) do
-    Puppet::Type.type(:network_route).new(
-        title:  '172.16.3.0/24',
-        prefix: '172.16.3.0/24',
-        metric: 0,
-    )
-  end
-
   let(:provider) do
     described_class.new(
         ensure: :present,
@@ -51,7 +43,6 @@ EOS
 
   describe 'prefetch' do
     before :each do
-      catalog.add_resource resource
       described_class.expects(:ip).with(%w{route list 172.16.3.0/24}).
           returns <<-EOS
 172.16.3.0/24 via 172.16.0.3 dev vlan100
@@ -68,8 +59,14 @@ EOS
           )
         end
 
+        let(:resources) do
+          {
+              "172.16.3.0/24 #{metric}": resource,
+          }
+        end
+
         it "with metric #{metric}" do
-          described_class.prefetch(catalog.resources)
+          described_class.prefetch(resources)
           expect(resource.provider.prefix).to eq('172.16.3.0/24')
           expect(resource.provider.nexthop).to eq('172.16.0.3')
           expect(resource.provider.device).to eq('vlan100')
