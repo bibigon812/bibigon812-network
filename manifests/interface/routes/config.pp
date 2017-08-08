@@ -13,11 +13,12 @@ define network::interface::routes::config (
   String
   $config_dir,
 
+  Array
+  $routes,
+
   Enum['absent', 'present']
   $ensure = 'present',
 
-  Array
-  $routes,
 ) {
 
   $env = $::environment
