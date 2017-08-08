@@ -43,7 +43,7 @@ EOS
 
   describe 'prefetch' do
     before :each do
-      described_class.expects(:ip).with(%w{route list 172.16.3.0/24}).
+      described_class.stubs(:ip).with(%w{route list 172.16.3.0/24}).
           returns <<-EOS
 172.16.3.0/24 via 172.16.0.3 dev vlan100
 172.16.3.0/24 via 172.16.0.3 dev vlan100  metric 1
@@ -51,27 +51,32 @@ EOS
       EOS
     end
 
-    [0, 1, 100].each do |metric|
-      context 'network_route \'172.16.3.0/24\'' do
-        let(:resource) do
-          Puppet::Type.type(:network_route).new(
-              title: "172.16.3.0/24 #{metric}",
-          )
-        end
 
-        let(:resources) do
-          {
-              "172.16.3.0/24 #{metric}": resource,
-          }
-        end
+    context 'network_route \'172.16.3.0/24\'' do
+      let(:resources) do
+        hash = {}
+            [0, 1, 100].each do |metric|
+              hash["172.16.3.0/24 #{metric}"] = Puppet::Type.type(:network_route).new(title: "172.16.3.0/24 #{metric}")
+            end
+        hash
+      end
 
-        it "with metric #{metric}" do
-          described_class.prefetch(resources)
-          expect(resource.provider.prefix).to eq('172.16.3.0/24')
-          expect(resource.provider.nexthop).to eq('172.16.0.3')
-          expect(resource.provider.device).to eq('vlan100')
-          expect(resource.provider.metric).to eq(metric)
-        end
+      it 'with metric 0, 1, 100' do
+        described_class.prefetch(resources)
+        expect(resources['172.16.3.0/24 0'].provider.prefix).to eq('172.16.3.0/24')
+        expect(resources['172.16.3.0/24 0'].provider.nexthop).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 0'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 0'].provider.metric).to eq(0)
+
+        expect(resources['172.16.3.0/24 1'].provider.prefix).to eq('172.16.3.0/24')
+        expect(resources['172.16.3.0/24 1'].provider.nexthop).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 1'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 1'].provider.metric).to eq(1)
+
+        expect(resources['172.16.3.0/24 100'].provider.prefix).to eq('172.16.3.0/24')
+        expect(resources['172.16.3.0/24 100'].provider.nexthop).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 100'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 100'].provider.metric).to eq(100)
       end
     end
   end

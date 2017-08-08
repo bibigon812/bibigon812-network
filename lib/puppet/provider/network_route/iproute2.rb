@@ -24,7 +24,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def self.get_provider_hash(prefix, metric)
-    debug '[get_provider_hash]'
+    debug '[get_provider_hash][%{prefix} %{metric}]' % {prefix: prefix, metric: metric}
     hash = {}
 
     if metric == 0
@@ -34,7 +34,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
     end
     
     ip(['route', 'list', prefix]).split(/\n/).collect do |line|
-      if pattern =~ line
+      if pattern =~ line.strip
         hash = {
             ensure: :present,
             metric: metric,
@@ -53,7 +53,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
 
   def self.prefetch(resources)
     debug '[prefetch]'
-    resources.each do |title, resource|
+    resources.values.each do |resource|
       if provider = instance(resource[:prefix], resource[:metric])
         resource.provider = provider
       end
@@ -65,9 +65,9 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def create
-    debug 'Creating the route \'%{route}\'' % {route: to_S}
-
     @property_hash = @resource.to_hash
+
+    debug 'Creating the route \'%{route}\'' % {route: to_S}
 
     begin
       ip(get_ip_args(:add))
