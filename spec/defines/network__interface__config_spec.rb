@@ -26,13 +26,29 @@ describe 'network::interface::config' do
     let(:title) { 'eth0' }
     let(:params) do
       {
-          ipaddress: %w{10.0.0.1/24},
+          ipaddress:  %w{10.0.0.1/24},
           config_dir: '/etc/sysconfig/network-scripts',
-          type: :hw,
+          type:       :hw,
+          routes:     [
+              {
+                  ensure:  :present,
+                  device:  'eth0',
+                  metric:  100,
+                  nexthop: '192.168.0.1',
+                  prefix:  '10.0.0.0/8',
+              },
+              {
+                  ensure:  :present,
+                  device:  'eth0',
+                  metric:  0,
+                  nexthop: '192.168.0.1',
+                  prefix:  '172.16.0.0/12',
+              },
+          ],
       }
     end
 
-    it do
+    it 'should contain ifcfg-eth0' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-eth0')
         .with_content(<<-OES
 #
@@ -49,20 +65,32 @@ TYPE=Ethernet
       OES
         )
     end
+
+    it 'should contain route-eth0' do
+      is_expected.to contain_file('/etc/sysconfig/network-scripts/route-eth0').
+          with_content(<<-OES
+#
+# Managed by Puppet in the sandbox environment
+#
+10.0.0.0/8 via 192.168.0.1 dev eth0 metric 100
+172.16.0.0/12 via 192.168.0.1 dev eth0 metric 0
+          OES
+          )
+    end
   end
 
   context 'bond0' do
     let(:title) { 'bond0' }
     let(:params) do
       {
-          bond_lacp_rate: :fast,
-          bond_miimon: 100,
-          bond_mode: '802.3ad',
-          bond_slaves: [:eth1],
+          bond_lacp_rate:        :fast,
+          bond_miimon:           100,
+          bond_mode:             '802.3ad',
+          bond_slaves:           [:eth1],
           bond_xmit_hash_policy: :layer2,
-          ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
-          config_dir: '/etc/sysconfig/network-scripts',
-          type: :bond,
+          ipaddress:             %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
+          config_dir:            '/etc/sysconfig/network-scripts',
+          type:                  :bond,
       }
     end
 
@@ -84,7 +112,7 @@ OES
         )
     end
 
-    it do
+    it 'should contain ifcfg-bond0' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:1').with_content(<<-OES
 #
 # Managed by Puppet in the sandbox environment
@@ -100,7 +128,7 @@ OES
       )
     end
 
-    it do
+    it 'should contain ifcfg-bond0:2' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:2').with_content(<<-OES
 #
 # Managed by Puppet in the sandbox environment
@@ -128,7 +156,7 @@ OES
       }
     end
 
-    it do
+    it 'should contain ifcfg-bond0.100' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0.100').with_content(<<-OES
 #
 # Managed by Puppet in the sandbox environment
@@ -159,7 +187,7 @@ OES
       }
     end
 
-    it do
+    it 'should contain ifcfg-vlan100' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-vlan100').with_content(<<-OES
 #
 # Managed by Puppet in the sandbox environment
