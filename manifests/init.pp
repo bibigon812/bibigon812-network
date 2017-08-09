@@ -87,31 +87,44 @@ class network (
   }
 
   # Find bond_slaves and add master to them
-  merge($interfaces,
-    $interfaces.reduce({}) |Hash $slaves, Tuple[String, Hash] $value| {
-      $interface_name = $value[0]
-      if $value[1]['bond_slaves'] {
-        merge($slaves, any2array($value[1]['bond_slaves']).reduce({}) |Hash $memo, String $value| {
-          merge($memo, { $value => { master => $interface_name } })
-        })
-      } else {
-        $slaves
+  merge(
+    merge(
+
+      $interfaces,
+      $interfaces.reduce({}) |Hash $slaves, Tuple[String, Hash] $value| {
+
+        $interface_name = $value[0]
+        if $value[1]['bond_slaves'] {
+          merge($slaves, any2array($value[1]['bond_slaves']).reduce({}) |Hash $memo, String $value| {
+            merge($memo, { $value => { master => $interface_name } })
+          })
+        } else {
+          $slaves
+        }
       }
+    ),
+
+    $routes.reduce({}) |Hash $route_devices, Tuple[String, Hash] $value| {
+
+      $prefix_metric_array = split($value[0], /\s+/)
+      $prefix = $prefix_metric_array[0]
+      $metric = $prefix_metric_array[1] ? {
+        undef => 0,
+        default => $prefix_metric_array[1],
+      }
+
+      deep_merge(
+        $route_devices,
+        {
+          $value[1]['device'] => { routes => [ merge($value[1], { prefix => $prefix, metric => $metric }) ] }
+        }
+      )
     }
+
   ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
       * => $interface_params,
     }
-  }
-
-  $routes.each |String $route_name, Hash $route_params| {
-    network_route {$route_name:
-      * => $route_params,
-    }
-  }
-
-  Network::Interface::Routes::Config {
-    config_dir => $config_dir,
   }
 
   # Prepare the hash for route files
