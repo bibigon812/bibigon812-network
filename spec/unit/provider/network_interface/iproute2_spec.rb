@@ -341,6 +341,7 @@ EOS
 
 
       it 'with all params' do
+        provider.stubs(:interface_exists?).returns true
         provider.expects(:ip).with(%w{link set dev eth1 down})
         resource.provider = provider
         provider.destroy
@@ -374,7 +375,7 @@ EOS
 
       it 'with all params' do
         resource.provider = provider
-        provider.stubs(:interface_exists?).with('vlan100').returns true
+        provider.stubs(:interface_exists?).returns true
         provider.expects(:ip).with(%w{link set dev vlan100 down})
         provider.expects(:ip).with(%w{link delete dev vlan100 type vlan})
         provider.destroy

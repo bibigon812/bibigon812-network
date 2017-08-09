@@ -252,6 +252,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
 
   def destroy
+    return unless interface_exists?(@property_hash[:name])
+
     debug 'Shutdown the interface %{name}.' % { name: @property_hash[:name] }
 
     self.state = :down
@@ -264,10 +266,8 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'bond'])
 
     elsif @property_hash[:type] == :vlan
-      if interface_exists?(@property_hash[:name])
-        debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
-        ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'vlan'])
-      end
+      debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
+      ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'vlan'])
 
     else
       debug 'Can not destroy the hardware interface \'%{name}\'.' % { name: @property_hash[:name] }
