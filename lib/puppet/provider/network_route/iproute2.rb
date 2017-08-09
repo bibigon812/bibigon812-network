@@ -30,9 +30,9 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
     if metric == 0
       pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?\Z/
     else
-      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?(?:\s+metric\s+(#{Regexp.escape(metric.to_s)}))?\Z/
+      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?\s+metric\s+#{Regexp.escape(metric.to_s)}\Z/
     end
-    
+
     ip(['route', 'list', prefix]).split(/\n/).collect do |line|
       if pattern =~ line.strip
         hash = {
@@ -54,9 +54,9 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
 
   def self.prefetch(resources)
     debug '[prefetch]'
-    resources.values.each do |resource|
-      if provider = instance(resource[:prefix], resource[:metric])
-        resource.provider = provider
+    resources.keys.each do |name|
+      if provider = instance(resources[name][:prefix], resources[name][:metric])
+        resources[name].provider = provider
       end
     end
   end
