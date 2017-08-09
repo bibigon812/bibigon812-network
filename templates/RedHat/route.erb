@@ -1,7 +1,8 @@
 #
-# Managed by Puppet in the <%= @env %> environment
+# Managed by Puppet in the <%= @environment %> environment
 #
-<% @routes.each do |route| -%>
+<% @routes.each do |route|  -%>
+<% if route['ensure'] == 'present' -%>
 <%= route['prefix'] -%>
 <% unless route['nexthop'].nil? -%>
  via <%= route['nexthop'] -%>
@@ -10,4 +11,5 @@
 <% unless route['metric'].nil? -%>
  metric <%= route['metric'] -%>
 <% end %>
-<% end %>
+<% end -%>
+<% end -%>
