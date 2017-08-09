@@ -96,8 +96,15 @@ define network::interface::config (
   }
 
   # Add routes config
-  file {"${config_dir}/route-${name}":
-    ensure  => $ensure,
-    content => template("network/${facts['os']['family']}/route.erb"),
+  if empty($routes) {
+    file {"${config_dir}/route-${name}":
+      ensure  => absent,
+    }
+
+  } else {
+    file { "${config_dir}/route-${name}":
+      ensure  => $ensure,
+      content => template("network/${facts['os']['family']}/route.erb"),
+    }
   }
 }
