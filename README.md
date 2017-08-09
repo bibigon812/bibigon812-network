@@ -58,15 +58,25 @@ network::interfaces:
             - eth0
             - eth1
         mtu: 9000
-    bond0.100:
+    valn100:
         ipaddress:
             - 10.0.0.1/24
             - 172.16.0.1/24
         mtu: 1500
-    bond0.110:
+        parent: bond0
+    vlan110:
         ipaddress:
             - 192.168.255.1/24
         mtu: 9000
+        parent: bond0
+---
+network::routes:
+    192.168.0.0/24:
+        device: vlan100
+        nexthop: 172.16.0.100
+    192.168.0.0/24 100:
+        device: vlan110
+        nexthop: 192.168.255.100
 ```
 
 ## Usage
@@ -114,7 +124,7 @@ network::interfaces:
 ### Create the vlan interface
 ```puppet
 network_interface { 'bond0.100':
-    ensure => present,
+    ensure    => present,
     ipaddress => [
         '10.0.0.1/24',
         '172.16.0.1/24',
@@ -134,12 +144,12 @@ network::interfaces:
 
 ```puppet
 network_interface { 'vlan100':
-    ensure => present,
+    ensure    => present,
     ipaddress => [
         '10.0.0.1/24',
         '172.16.0.1/24',
     ],
-    parent => 'bond0',
+    parent    => 'bond0',
 }
 ```
 
@@ -151,6 +161,24 @@ network::interfaces:
             - 10.0.0.1/24
             - 172.16.0.1/24
         parent: bond0
+```
+
+### Create routes
+
+```puppet
+network_route { '192.168.0.0/24':
+    ensure  => present,
+    device  => 'vlan100',
+    nexthop => '10.0.0.100',
+}
+```
+
+```yaml
+network::routes:
+    192.168.0.0/24:
+        ensure: present
+        device: vlan100
+        nexthop: 10.0.0.100
 ```
 
 ## Reference
@@ -174,6 +202,10 @@ when available, to generate the hash. Defaults to `layer3+4`.
 - `state`. State of this interface. Can be `up` and `down`. Defaults to `up`.
 - `vlanid`. Vlan ID.
 
-## TODO
+### network_route
 
-* Network::Route
+- `name`. Contains the IP prefix and the metric (optional).
+- `prefix`. Specifies the IP prefix. The default value obtains from the name.
+- `metric`. Specifies the metric. The default value obtains rom the name.
+- `device`. Specifies the device.
+- `nexthop`. Specifies the next hop.

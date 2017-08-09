@@ -1,3 +1,17 @@
+## [1.0.0] - 2017-09-03
+
+### Added
+
+- the `network_route` resource type
+
+### Changed
+
+- the `network::interface_config_dir` parameter to `network::config_dir`
+
+### Fixed
+
+- removing the vlan interface
+
 ## [0.1.1] - 2017-09-03
 
 ### Updated
