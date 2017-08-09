@@ -19,6 +19,9 @@ define network::interface::config (
   Enum['down', 'up']
   $state = 'up',
 
+  Array
+  $routes = [],
+
   Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
   $type = undef,
 
@@ -90,5 +93,11 @@ define network::interface::config (
   file {"${config_dir}/ifcfg-${name}":
     ensure  => $ensure,
     content => template("network/${facts['os']['family']}/ifcfg.erb"),
+  }
+
+  # Add routes config
+  file {"${config_dir}/route-${name}":
+    ensure  => $ensure,
+    content => template("network/${facts['os']['family']}/route.erb"),
   }
 }

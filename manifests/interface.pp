@@ -13,6 +13,9 @@ define network::interface (
   Enum['absent', 'present']
   $ensure = 'present',
 
+  Array
+  $routes = [],
+
   Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
   $type = undef,
 
@@ -143,6 +146,12 @@ define network::interface (
     vlanid                => $real_vlanid,
   }
 
+  $routes.each |String $route_name, Hash $route_params| {
+    network_route {$route_name:
+      * => $route_params,
+    }
+  }
+
   # Create configuration files
   network::interface::config {$name:
     ensure                => $ensure,
@@ -159,6 +168,7 @@ define network::interface (
     parent                => $parent,
     state                 => $state,
     vlanid                => $real_vlanid,
+    routes                => $routes,
     require               => Network_interface[$name],
   }
 }
