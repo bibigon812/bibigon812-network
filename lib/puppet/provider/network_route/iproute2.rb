@@ -28,9 +28,9 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
     hash = {}
 
     if metric == 0
-      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?\Z/
+      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?(?:\s+scope\s+(\S+))?\Z/
     else
-      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?\s+metric\s+#{Regexp.escape(metric.to_s)}\Z/
+      pattern = /\A(\S+)(?:\s+via\s+(\S+))?(?:\s+dev\s+(\S+))?(?:\s+scope\s+(\S+))?\s+metric\s+#{Regexp.escape(metric.to_s)}\Z/
     end
 
     ip(['route', 'list', prefix]).split(/\n/).collect do |line|
