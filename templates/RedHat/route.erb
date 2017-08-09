@@ -2,7 +2,7 @@
 # Managed by Puppet in the <%= @environment %> environment
 #
 <% @routes.each do |route|  -%>
-<% if route['ensure'] == 'present' -%>
+<% unless route['ensure'] == 'absent' -%>
 <%= route['prefix'] -%>
 <% unless route['nexthop'].nil? -%>
  via <%= route['nexthop'] -%>
