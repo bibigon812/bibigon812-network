@@ -6,15 +6,18 @@ Puppet::Type.newtype(:network_route) do
     defaultto :present
   end
 
-  def self.title_patterns
-    [
-        [ /\A(\S+)\Z/, [ [:prefix] ] ],
-        [ /\A(\S+)\s+(\S+)\Z/, [ [:prefix], [:metric] ] ],
-    ]
+  newparam(:name, namevar: true) do
+    desc 'IP address/prefix and metric optional.'
+    newvalues(/\A\S+(?:\s+\d+\Z)?/)
+
+    munge do |value|
+      value.gsub(/\s+/, ' ')
+    end
   end
 
-  newparam(:prefix, namevar: true) do
-    desc 'IP: address/prefix.'
+  newproperty(:prefix) do
+    desc 'IP address/prefix.'
+    defaultto { resource[:name].split(/\s+/)[0] }
 
     validate do |value|
       begin
@@ -26,7 +29,7 @@ Puppet::Type.newtype(:network_route) do
     end
   end
 
-  newparam(:metric, namevar: true) do
+  newproperty(:metric) do
     desc 'Specifies metric.'
 
     newvalues(/\A\d+\Z/)
@@ -41,7 +44,7 @@ Puppet::Type.newtype(:network_route) do
       Integer(value)
     end
 
-    defaultto 0
+    defaultto { resource[:name].split(/\s+/)[1] || 0 }
   end
 
   newproperty(:device) do

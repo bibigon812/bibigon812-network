@@ -56,7 +56,7 @@ EOS
       let(:resources) do
         hash = {}
             [0, 1, 100].each do |metric|
-              hash["172.16.3.0/24 #{metric}"] = Puppet::Type.type(:network_route).new(title: "172.16.3.0/24 #{metric}")
+              hash["172.16.3.0/24 #{metric}"] = Puppet::Type.type(:network_route).new(name: "172.16.3.0/24 #{metric}")
             end
         hash
       end

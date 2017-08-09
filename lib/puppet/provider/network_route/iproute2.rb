@@ -36,10 +36,11 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
     ip(['route', 'list', prefix]).split(/\n/).collect do |line|
       if pattern =~ line.strip
         hash = {
-            ensure: :present,
-            metric: metric,
-            name:   self.name,
-            prefix: $1,
+            ensure:   :present,
+            metric:   metric,
+            name:     "#{prefix} #{metric}",
+            prefix:   $1,
+            provider: self.name,
         }
         hash[:device] = $3 unless $3.nil?
         hash[:nexthop] = $2 unless $2.nil?
