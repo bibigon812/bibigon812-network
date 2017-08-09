@@ -95,9 +95,12 @@ class network (
 
         $interface_name = $value[0]
         if $value[1]['bond_slaves'] {
-          merge($slaves, any2array($value[1]['bond_slaves']).reduce({}) |Hash $memo, String $value| {
-            merge($memo, { $value => { master => $interface_name } })
-          })
+          merge(
+            $slaves,
+            any2array($value[1]['bond_slaves']).reduce({}) |Hash $memo, String $value| {
+              merge($memo, { $value => { master => $interface_name } })
+            }
+          )
         } else {
           $slaves
         }
@@ -108,33 +111,37 @@ class network (
 
       $prefix_metric_array = split($value[0], /\s+/)
       $prefix = $prefix_metric_array[0]
+
       $metric = $prefix_metric_array[1] ? {
         undef => 0,
         default => $prefix_metric_array[1],
       }
 
-      deep_merge(
-        $route_devices,
-        {
-          $value[1]['device'] => { routes => [ merge($value[1], { prefix => $prefix, metric => $metric }) ] }
-        }
-      )
-    }
+      if $value[1]['device'] {
+        deep_merge(
+          $route_devices,
+          {
+            $value[1]['device'] => {
+              routes => [
+                merge($value[1], { prefix => $prefix, metric => $metric })
+              ]
+            }
+          }
+        )
 
+      } else {
+        $route_devices
+      }
+    }
   ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
       * => $interface_params,
     }
   }
 
-  # Prepare the hash for route files
-  $routes.reduce({}) |Hash $route_devices, Tuple[String, Hash] $value| {
-    $prefix = split($value[0], /\s+/)[0]
-    merge($route_devices, { $value[1]['device'] => deep_merge({ routes => [ merge($value[1], { prefix => $prefix }) ] }) })
-  }.each |String $device, Hash $routes| {
-    network::interface::routes::config {$device:
-      *       => $routes,
-      require => Network::Interface::Config[$device],
+  $routes.each |String $route_name, Hash $route_params| {
+    network_route {$route_name:
+      * => $route_params,
     }
   }
 }

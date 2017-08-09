@@ -146,12 +146,6 @@ define network::interface (
     vlanid                => $real_vlanid,
   }
 
-  $routes.each |String $route_name, Hash $route_params| {
-    network_route {$route_name:
-      * => $route_params,
-    }
-  }
-
   # Create configuration files
   network::interface::config {$name:
     ensure                => $ensure,
