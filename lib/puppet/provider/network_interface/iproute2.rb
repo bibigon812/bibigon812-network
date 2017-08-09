@@ -264,8 +264,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'bond'])
 
     elsif @property_hash[:type] == :vlan
-      debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
-      ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'vlan'])
+      if interface_exists?(@property_hash[:name])
+        debug 'Destroy the interface %{name}.' % { name: @property_hash[:name] }
+        ip(['link', 'delete', 'dev', @property_hash[:name], 'type', 'vlan'])
+      end
 
     else
       debug 'Can not destroy the hardware interface \'%{name}\'.' % { name: @property_hash[:name] }
@@ -461,7 +463,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def hw_interface_exists?(name)
+  def interface_exists?(name)
     File.symlink?("/sys/class/net/#{name}")
   end
 
@@ -492,7 +494,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     prefix = command == delete ? '-' : '+'
 
     slaves.each do |slave|
-      next unless hw_interface_exists?(slave)
+      next unless interface_exists?(slave)
 
       ip(['link', 'set', 'dev', slave, 'down']) if get_interface_state(slave) == :up
       begin
