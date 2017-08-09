@@ -1,4 +1,11 @@
-## [1.0.0] - 2017-09-03
+## [1.0.1] - 2017-08-09
+
+### Fixed
+
+- the README.md
+- dates in the CHANGELOG.md
+
+## [1.0.0] - 2017-08-09
 
 ### Added
 
@@ -12,13 +19,13 @@
 
 - removing the vlan interface
 
-## [0.1.1] - 2017-09-03
+## [0.1.1] - 2017-08-03
 
 ### Updated
 
 - the alias file management
 
-## [0.1.0] - 2017-09-02
+## [0.1.0] - 2017-08-02
 
 ### Added
 
