@@ -21,8 +21,9 @@ describe 'network' do
         }
     }
   end
+  let(:environment) { :sandbox }
 
-  context 'with default values for all parameters' do
-    it { should contain_class('network') }
-  end
+  it { should contain_class('network') }
+  it { is_expected.to compile }
+  it { is_expected.to compile.with_all_deps }
 end
