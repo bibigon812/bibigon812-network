@@ -14,3 +14,6 @@ network::routes:
   192.168.0.0/24:
     device: bond0.100
     nexthop: 10.0.0.100
+  192.168.0.0/24 100:
+    device: bond0.100
+    nexthop: 10.0.0.101
