@@ -11,7 +11,6 @@
     * [Beginning with network](#beginning-with-network)
 1. [Usage - Configuration options and additional functionality](#usage)
 1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-1. [TODO](#todo)
 
 ## Description
 
@@ -179,6 +178,20 @@ network::routes:
         ensure: present
         device: vlan100
         nexthop: 10.0.0.100
+```
+
+```puppet
+network_route { '10.0.0.0/24 250':
+    ensure  => present,
+    device  => 'vlan200',
+}
+```
+
+```yaml
+network::route:
+    10.0.0.0/24 250:
+        ensure: present
+        device: vlan200
 ```
 
 ## Reference
