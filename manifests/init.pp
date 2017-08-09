@@ -86,10 +86,9 @@ class network (
     config_dir => $config_dir,
   }
 
-  # Find bond_slaves and add master to them
-  merge(
+  deep_merge(
+    # Add the hash { master => 'master_interface_name' } to the slave interface
     merge(
-
       $interfaces,
       $interfaces.reduce({}) |Hash $slaves, Tuple[String, Hash] $value| {
 
@@ -107,6 +106,7 @@ class network (
       }
     ),
 
+    # Add the hash { routes => [ .. ] } to interfaces
     $routes.reduce({}) |Hash $route_devices, Tuple[String, Hash] $value| {
 
       $prefix_metric_array = split($value[0], /\s+/)
@@ -118,21 +118,20 @@ class network (
       }
 
       if $value[1]['device'] {
-        deep_merge(
-          $route_devices,
-          {
-            $value[1]['device'] => {
-              routes => [
-                merge($value[1], { prefix => $prefix, metric => $metric })
-              ]
-            }
+        {
+          $value[1]['device'] => {
+            routes => concat(
+              $route_devices.dig44([$value[1]['device'], 'routes'], []),
+              merge($value[1], { prefix => $prefix, metric => $metric })
+            )
           }
-        )
+        }
 
       } else {
         $route_devices
       }
     }
+
   ).each |String $interface_name, Hash $interface_params| {
     network::interface {$interface_name:
       * => $interface_params,
