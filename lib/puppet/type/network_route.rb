@@ -32,6 +32,7 @@ Puppet::Type.newtype(:network_route) do
   newproperty(:metric) do
     desc 'Specifies metric.'
 
+    defaultto { resource[:name].split(/\s+/)[1] || 0 }
     newvalues(/\A\d+\Z/)
 
     validate do |value|
@@ -43,16 +44,14 @@ Puppet::Type.newtype(:network_route) do
     munge do |value|
       Integer(value)
     end
-
-    defaultto { resource[:name].split(/\s+/)[1] || 0 }
   end
 
-  newproperty(:device) do
-    desc 'Specifies device which routes connected to.'
+  newproperty(:dev) do
+    desc 'Specifies device which this route connected to.'
   end
 
-  newproperty(:nexthop) do
-    desc 'Specifies next hop destination'
+  newproperty(:via) do
+    desc 'Specifies nexthop destination'
 
     validate do |value|
       begin
@@ -64,6 +63,10 @@ Puppet::Type.newtype(:network_route) do
   end
 
   autorequire(:network_interface) do
-    [self[:device]] if self[:device]
+    if self[:device]
+      [self[:device]]
+    else
+      []
+    end
   end
 end

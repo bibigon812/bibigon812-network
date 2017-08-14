@@ -42,8 +42,8 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
             prefix:   $1,
             provider: self.name,
         }
-        hash[:device] = $3 unless $3.nil?
-        hash[:nexthop] = $2 unless $2.nil?
+        hash[:dev] = $3 unless $3.nil?
+        hash[:via] = $2 unless $2.nil?
 
         break
       end
@@ -100,16 +100,16 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
   end
 
   def to_S
-    out = "#{prefix} via #{nexthop}"
-    out << " dev #{device}" unless device == :absent
+    out = "#{prefix} via #{via}"
+    out << " dev #{dev}" unless dev == :absent
     out << " metric #{metric}" unless metric == :absent
     out
   end
 
   def get_ip_args(command)
     cmd =  ['route', command.to_s, prefix]
-    cmd += ['via', nexthop] unless nexthop == :absent
-    cmd += ['dev', device] unless device == :absent
+    cmd += ['via', via] unless via == :absent
+    cmd += ['dev', dev] unless dev == :absent
     cmd += ['metric', metric.to_s]
     cmd
   end

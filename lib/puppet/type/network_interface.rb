@@ -1,4 +1,4 @@
-require 'puppet/util/bibigon812/network'
+require 'puppet/util/network'
 
 Puppet::Type.newtype(:network_interface) do
   @doc = %q{

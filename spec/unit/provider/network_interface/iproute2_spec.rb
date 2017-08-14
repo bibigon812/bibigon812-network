@@ -35,7 +35,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     link/ipip 0.0.0.0 brd 0.0.0.0
 5: bond0: <NO-CARRIER,BROADCAST,MULTICAST,MASTER,UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
-6: bond0.100@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+6: vlan100@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
     inet 172.16.33.103/24 brd 172.16.32.255 scope global eth1
        valid_lft forever preferred_lft forever
@@ -66,17 +66,17 @@ EOS
       expect(described_class.instances.size).to eq(7)
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource lo' do
       expect(described_class.instances[0].instance_variable_get('@property_hash')).to eq(
-          {
-              ensure:    :present,
-              ipaddress: %w{127.0.0.1/8 10.255.0.1/32 192.168.0.1/32},
-              mtu:       65536,
-              name:      'lo',
-              provider:  :iproute2,
-              state:     :up,
-              type:      :hw,
-          }
+        {
+          ensure:    :present,
+          ipaddress: %w{127.0.0.1/8 10.255.0.1/32 192.168.0.1/32},
+          mtu:       65536,
+          name:      'lo',
+          provider:  :iproute2,
+          state:     Puppet::Util::Network::Up,
+          type:      Puppet::Util::Network::Loopback,
+        }
       )
     end
 
@@ -89,13 +89,13 @@ EOS
               mtu:       1500,
               name:      'eth0',
               provider:  :iproute2,
-              state:     :up,
-              type:      :hw,
+              state:     Puppet::Util::Network::Up,
+              type:      Puppet::Util::Network::Ethernet,
           }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource eth1' do
       expect(described_class.instances[2].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
@@ -104,13 +104,13 @@ EOS
             mtu:       1500,
             name:      'eth1',
             provider:  :iproute2,
-            state:     :up,
-            type:      :hw,
+            state:     Puppet::Util::Network::Up,
+            type:      Puppet::Util::Network::Ethernet,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource ip_vti0' do
       expect(described_class.instances[3].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
@@ -118,13 +118,13 @@ EOS
             mtu:       1500,
             name:      'ip_vti0',
             provider:  :iproute2,
-            state:     :down,
-            type:      :hw,
+            state:     Puppet::Util::Network::Down,
+            type:      Puppet::Util::Network::Unknown,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource bond0' do
       expect(described_class.instances[4].instance_variable_get('@property_hash')).to eq(
         {
             bond_lacp_rate:        'slow',
@@ -138,30 +138,30 @@ EOS
             mtu:                   1500,
             name:                  'bond0',
             provider:              :iproute2,
-            state:                 :up,
-            type:                  :bond,
+            state:                 Puppet::Util::Network::Up,
+            type:                  Puppet::Util::Network::Bonding,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource vlan100' do
       expect(described_class.instances[5].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
             ipaddress: %w{172.16.33.103/24},
             mac:       '08:00:27:9c:76:49',
             mtu:       1500,
-            name:      'bond0.100',
+            name:      'vlan100',
             parent:    'bond0',
             provider:  :iproute2,
-            state:     :up,
+            state:     Puppet::Util::Network::Up,
             vlanid:    100,
-            type:      :vlan,
+            type:      Puppet::Util::Network::Vlan,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource vlan200' do
       expect(described_class.instances[6].instance_variable_get('@property_hash')).to eq(
           {
               ensure:    :present,
@@ -171,9 +171,9 @@ EOS
               name:      'vlan200',
               parent:    'bond0',
               provider:  :iproute2,
-              state:     :up,
+              state:     Puppet::Util::Network::Up,
               vlanid:    200,
-              type:      :vlan,
+              type:      Puppet::Util::Network::Vlan,
           }
       )
     end
@@ -334,8 +334,8 @@ EOS
             mtu:       1500,
             name:      'eth1',
             provider:  :iproute2,
-            state:     :up,
-            type:      :hw,
+            state:     Puppet::Util::Network::Up,
+            type:      Puppet::Util::Network::Ethernet,
         )
       end
 
@@ -367,9 +367,9 @@ EOS
             mtu:       1500,
             name:      'vlan100',
             provider:  :iproute2,
-            state:     :up,
+            state:     Puppet::Util::Network::Up,
             vlanid:    100,
-            type:      :vlan
+            type:      Puppet::Util::Network::Vlan
         )
       end
 
@@ -396,12 +396,12 @@ EOS
         described_class.new(
             name:     'bond0',
             provider: :iproute2,
-            state:    :up,
-            type:     :bond,
+            state:    Puppet::Util::Network::Up,
+            type:     Puppet::Util::Network::Bonding,
         )
       end
 
-      it 'should add slaves' do
+      it 'should add bond_slaves' do
         File.stubs(:read).with('/sys/class/net/bonding_masters').returns ''
         File.expects(:read).with('/sys/class/net/eth2/operstate').returns 'up'
         File.expects(:read).with('/sys/class/net/eth3/operstate').returns 'up'

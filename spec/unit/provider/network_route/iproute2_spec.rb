@@ -34,7 +34,7 @@ EOS
 
   let(:provider) do
     described_class.new(
-        ensure: :present,
+        ensure:   :present,
         provider: :iproute2,
     )
   end
@@ -64,18 +64,18 @@ EOS
       it 'with metric 0, 1, 100' do
         described_class.prefetch(resources)
         expect(resources['172.16.3.0/24 0'].provider.prefix).to eq('172.16.3.0/24')
-        expect(resources['172.16.3.0/24 0'].provider.nexthop).to eq('172.16.0.3')
-        expect(resources['172.16.3.0/24 0'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 0'].provider.via).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 0'].provider.dev).to eq('vlan100')
         expect(resources['172.16.3.0/24 0'].provider.metric).to eq(0)
 
         expect(resources['172.16.3.0/24 1'].provider.prefix).to eq('172.16.3.0/24')
-        expect(resources['172.16.3.0/24 1'].provider.nexthop).to eq('172.16.0.3')
-        expect(resources['172.16.3.0/24 1'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 1'].provider.via).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 1'].provider.dev).to eq('vlan100')
         expect(resources['172.16.3.0/24 1'].provider.metric).to eq(1)
 
         expect(resources['172.16.3.0/24 100'].provider.prefix).to eq('172.16.3.0/24')
-        expect(resources['172.16.3.0/24 100'].provider.nexthop).to eq('172.16.0.3')
-        expect(resources['172.16.3.0/24 100'].provider.device).to eq('vlan100')
+        expect(resources['172.16.3.0/24 100'].provider.via).to eq('172.16.0.3')
+        expect(resources['172.16.3.0/24 100'].provider.dev).to eq('vlan100')
         expect(resources['172.16.3.0/24 100'].provider.metric).to eq(100)
       end
     end
@@ -90,8 +90,8 @@ EOS
       context 'network_route \'172.16.0.0/24\'' do
         let(:resource) do
           Puppet::Type.type(:network_route).new(
-              title:   "172.16.0.0/24 #{metric}",
-              nexthop: '192.168.0.1',
+              title: "172.16.0.0/24 #{metric}",
+              via:   '192.168.0.1',
           )
         end
         it "with metric #{metric}" do
@@ -113,10 +113,10 @@ EOS
         let(:provider) do
           described_class.new(
               ensure:   :present,
-              device:   'vlan100',
+              dev:      'vlan100',
               prefix:   '172.16.0.0/24',
               metric:   metric,
-              nexthop:  '192.168.0.1',
+              via:      '192.168.0.1',
               provider: :iproute2,
           )
         end
@@ -138,16 +138,16 @@ EOS
         let(:provider) do
           described_class.new(
               ensure:   :present,
-              device:   'vlan100',
+              dev:      'vlan100',
               prefix:   '172.16.0.0/24',
               metric:   metric,
-              nexthop:  '192.168.0.2',
+              via:      '192.168.0.2',
               provider: :iproute2,
           )
         end
         it "with metric #{metric}" do
           provider.expects(:ip).with(['route', 'change', '172.16.0.0/24', 'via', '192.168.0.1', 'dev', 'vlan100', 'metric', metric.to_s])
-          provider.nexthop = '192.168.0.1'
+          provider.via = '192.168.0.1'
           provider.flush
         end
       end

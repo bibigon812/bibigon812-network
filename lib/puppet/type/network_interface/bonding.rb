@@ -1,6 +1,6 @@
-require 'puppet/util/bibigon812/network'
+require 'puppet/util/network'
 
-Puppet::Type.type(:network_interface).newproperty(:lacp_rate) do
+Puppet::Type.type(:network_interface).newproperty(:bond_lacp_rate) do
   desc %q{
     Option specifying the rate in which we'll ask our link partner to transmit
     LACPDU packets in 802.3ad mode.
@@ -10,7 +10,7 @@ Puppet::Type.type(:network_interface).newproperty(:lacp_rate) do
   newvalues(:slow, :fast)
 end
 
-Puppet::Type.type(:network_interface).newproperty(:miimon) do
+Puppet::Type.type(:network_interface).newproperty(:bond_miimon) do
   desc 'Specifies the MII link monitoring frequency in milliseconds.'
 
   defaultto(100)
@@ -48,7 +48,7 @@ Puppet::Type.type(:network_interface).newproperty(:bond_slaves, array_matching: 
   end
 end
 
-Puppet::Type.type(:network_interface).newproperty(:xmit_hash_policy) do
+Puppet::Type.type(:network_interface).newproperty(:bond_xmit_hash_policy) do
   desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
 
   defaultto('layer3+4')

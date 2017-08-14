@@ -1,4 +1,4 @@
-require 'puppet/util/bibigon812/network'
+require 'puppet/util/network'
 
 Puppet::Type.type(:network_interface).autorequire(:network_interface) do
 

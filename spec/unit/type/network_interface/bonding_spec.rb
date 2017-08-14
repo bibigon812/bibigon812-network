@@ -18,42 +18,42 @@ describe described_type do
   end
 
   describe 'when validating attributes' do
-    [:lacp_rate, :miimon, :bond_mode, :bond_slaves, :xmit_hash_policy].each do |property|
+    [:bond_lacp_rate, :bond_miimon, :bond_mode, :bond_slaves, :bond_xmit_hash_policy].each do |property|
       it "should have a #{property} property" do
         expect(described_class.attrtype(property)).to eq(:property)
       end
     end
   end
 
-  describe 'lacp_rate' do
+  describe 'bond_lacp_rate' do
     it 'should contain :slow' do
-      expect(described_class.new(name: 'bond0')[:lacp_rate]).to eq(:slow)
+      expect(described_class.new(name: 'bond0')[:bond_lacp_rate]).to eq(:slow)
     end
 
     it 'should support fast as a value' do
-      expect { described_class.new(name: 'bond0', lacp_rate: 'fast') }.to_not raise_error
+      expect { described_class.new(name: 'bond0', bond_lacp_rate: 'fast') }.to_not raise_error
     end
 
     it 'should support slow as a value' do
-      expect { described_class.new(name: 'bond0', lacp_rate: :slow) }.to_not raise_error
+      expect { described_class.new(name: 'bond0', bond_lacp_rate: :slow) }.to_not raise_error
     end
 
     it 'should contain fast' do
-      expect(described_class.new(name: 'bond0', lacp_rate: 'fast')[:lacp_rate]).to eq(:fast)
+      expect(described_class.new(name: 'bond0', bond_lacp_rate: 'fast')[:bond_lacp_rate]).to eq(:fast)
     end
   end
 
-  describe 'miimon' do
+  describe 'bond_miimon' do
     it 'should support 1500 as a value' do
-      expect { described_class.new(name: 'bond0', miimon: 100) }.to_not raise_error
+      expect { described_class.new(name: 'bond0', bond_miimon: 100) }.to_not raise_error
     end
 
     it 'should not support \'100\' as a value' do
-      expect { described_class.new(name: 'bond0', miimon: '100') }.to_not raise_error
+      expect { described_class.new(name: 'bond0', bond_miimon: '100') }.to_not raise_error
     end
 
     it 'should not support 1 as a value' do
-      expect { described_class.new(name: 'bond0', miimon: -1) }.to raise_error Puppet::Error, /Invalid value/
+      expect { described_class.new(name: 'bond0', bond_miimon: -1) }.to raise_error Puppet::Error, /Invalid value/
     end
   end
 
@@ -77,7 +77,7 @@ describe described_type do
     end
   end
 
-  describe 'bond_bond_slaves' do
+  describe 'bond_slaves' do
     it 'should support eth0 as a value' do
       expect { described_class.new(name: 'bond0', bond_slaves: 'eth0') }.to_not raise_error
     end
@@ -97,20 +97,20 @@ describe described_type do
 
   describe 'xmit_hash_policy' do
     it 'should contain slow' do
-      expect(described_class.new(name: 'bond0')[:xmit_hash_policy]).to eq(:'layer3+4')
+      expect(described_class.new(name: 'bond0')[:bond_xmit_hash_policy]).to eq(:'layer3+4')
     end
 
     it 'should not support layer5 as a value' do
-      expect { described_class.new(name: 'bond0', xmit_hash_policy: 'slayer5') }.to raise_error Puppet::Error, /Invalid value/
+      expect { described_class.new(name: 'bond0', bond_xmit_hash_policy: 'slayer5') }.to raise_error Puppet::Error, /Invalid value/
     end
 
     %w{layer2 layer3+4}.each do |xmit_hash_policy|
       it "should support #{xmit_hash_policy} as a value" do
-        expect { described_class.new(name: 'bond0', xmit_hash_policy: xmit_hash_policy) }.to_not raise_error
+        expect { described_class.new(name: 'bond0', bond_xmit_hash_policy: xmit_hash_policy) }.to_not raise_error
       end
 
       it "should contain #{xmit_hash_policy}" do
-        expect(described_class.new(name: 'bond0', xmit_hash_policy: xmit_hash_policy)[:xmit_hash_policy]).to eq(:"#{xmit_hash_policy}")
+        expect(described_class.new(name: 'bond0', bond_xmit_hash_policy: xmit_hash_policy)[:bond_xmit_hash_policy]).to eq(:"#{xmit_hash_policy}")
       end
     end
   end
