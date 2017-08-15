@@ -15,6 +15,7 @@ Puppet::Type.newtype(:network_interface) do
     newvalues(/\Avlan\d+\Z/)
     newvalues(/\A([[:alpha:]]*([[:alpha:]]\d+)+)\Z/)
     newvalues(/\Alo\Z/)
+    newvalues(/\A\w+\Z/)
   end
 
   newparam(:type) do
