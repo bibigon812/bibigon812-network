@@ -18,6 +18,9 @@ module Puppet::Util::Network
     ethernet: {
       name_regexp: /\A([[:alpha:]]*(?:[[:alpha:]]\d+)+)\Z/,
     },
+    unknown: {
+      name_regexp: /\A\w+\Z/,
+    }
   }
 
   # Variables
