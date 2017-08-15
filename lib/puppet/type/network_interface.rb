@@ -93,28 +93,55 @@ Puppet::Type.newtype(:network_interface) do
       LACPDU packets in 802.3ad mode.
     }
 
-    defaultto(:slow)
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+        :slow
+      else
+        nil
+      end
+    end
+
     newvalues(:slow, :fast)
   end
 
   newproperty(:bond_miimon) do
     desc 'Specifies the MII link monitoring frequency in milliseconds.'
 
-    defaultto(100)
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+        100
+      else
+        nil
+      end
+    end
+
     newvalues(/\A\d+\Z/)
   end
 
   newproperty(:bond_mode) do
     desc 'Specifies one of the bonding policies.'
 
-    defaultto('802.3ad')
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+        '802.3ad'
+      else
+        nil
+      end
+    end
+
     newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
   end
 
   newproperty(:bond_slaves, array_matching: :all) do
     desc 'Specifies a list of the bonding slaves.'
 
-    defaultto([])
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+        []
+      else
+        nil
+      end
+    end
 
     validate do |value|
       unless Puppet::Util::Network::Bondable.include? Puppet::Util::Network::get_interface_type(value)
@@ -138,7 +165,14 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:bond_xmit_hash_policy) do
     desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
 
-    defaultto('layer3+4')
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+        'layer3+4'
+      else
+        nil
+      end
+    end
+
     newvalues('layer2', 'layer3+4')
   end
 
@@ -152,7 +186,7 @@ Puppet::Type.newtype(:network_interface) do
       unless Puppet::Util::Network::Vlanable.include? Puppet::Util::Network::get_interface_type(value)
         fail 'Invalid value. The interface \'%{value}\' cannot have vlan.' % {value: value}
       end
-      if value.nil?
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan and value.nil?
         fail 'Invalid value. The parent interface is not specified.'
       end
     end
@@ -161,10 +195,16 @@ Puppet::Type.newtype(:network_interface) do
   newparam(:vlanid) do
     desc 'Contains a vlanid.'
 
-    defaultto Puppet::Util::Network::Vlan1
+    defaultto do
+      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan
+        Puppet::Util::Network::Vlan1
+      else
+        nil
+      end
+    end
 
     munge do |value|
-      if resource[:type] == :vlan
+      if resource[:type] == Puppet::Util::Network::Vlan
         Integer(Puppet::Util::Network::Interfaces[:vlan][:name_regexp].match(resource[:name])[1])
       else
         nil
@@ -178,10 +218,13 @@ Puppet::Type.newtype(:network_interface) do
   autorequire(:network_interface) do
     reqs = []
 
-    reqs << self[:parent] unless self[:parent].nil?
+    if self[:type] == Puppet::Util::Network::Vlan
+      reqs << self[:parent] unless self[:parent].nil?
 
-    self[:bond_slaves].each do |slave|
-      reqs << slave
+    elsif self[:type] == Puppet::Util::Network::Bonding
+      self[:bond_slaves].each do |slave|
+        reqs << slave
+      end
     end
 
     reqs
