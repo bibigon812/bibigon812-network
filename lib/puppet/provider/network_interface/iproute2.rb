@@ -285,7 +285,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
       when :fixnum
         hash[option_name] = Integer(value)
       when :symbol
-        hash[option_name] = value.to_s
+        hash[option_name] = value.to_sym
       else
         hash[option_name] = value
       end
