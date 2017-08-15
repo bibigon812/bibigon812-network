@@ -2,13 +2,12 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),"..",".."))
 require 'puppet/util/network'
 
 Puppet::Type.type(:network_interface).autorequire(:network_interface) do
-
   reqs = []
 
-  reqs << self[:parent] unless self[:parent].nil?
-
-  self[:bond_slaves].each do |slave|
-    reqs << slave
+  if Puppet::Util::Network::get_interface_type(self[:name]) == Puppet::Util::Network::Vlan
+    reqs << self[:parent]
+  elsif Puppet::Util::Network::get_interface_type(self[:name]) == Puppet::Util::Network::Bonding
+    reqs += self[:bond_slaves]
   end
 
   reqs

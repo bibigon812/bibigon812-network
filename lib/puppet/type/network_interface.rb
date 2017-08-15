@@ -20,18 +20,6 @@ Puppet::Type.newtype(:network_interface) do
     end
   end
 
-  newparam(:type) do
-    desc 'Type of this iterface.'
-
-    defaultto do
-      Puppet::Util::Network::get_interface_type(resource[:name])
-    end
-
-    Puppet::Util::Network::Interfaces.each_key do |interface_type|
-      newvalues(interface_type)
-    end
-  end
-
   newproperty(:ipaddress, array_matching: :all) do
     desc 'Specifies a list of IP addresses.'
 

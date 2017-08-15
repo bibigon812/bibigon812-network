@@ -75,7 +75,6 @@ EOS
           name:      'lo',
           provider:  :iproute2,
           state:     Puppet::Util::Network::Up,
-          type:      Puppet::Util::Network::Loopback,
         }
       )
     end
@@ -90,7 +89,6 @@ EOS
               name:      'eth0',
               provider:  :iproute2,
               state:     Puppet::Util::Network::Up,
-              type:      Puppet::Util::Network::Ethernet,
           }
       )
     end
@@ -105,7 +103,6 @@ EOS
             name:      'eth1',
             provider:  :iproute2,
             state:     Puppet::Util::Network::Up,
-            type:      Puppet::Util::Network::Ethernet,
         }
       )
     end
@@ -119,7 +116,6 @@ EOS
             name:      'ip_vti0',
             provider:  :iproute2,
             state:     Puppet::Util::Network::Down,
-            type:      Puppet::Util::Network::Unknown,
         }
       )
     end
@@ -139,7 +135,6 @@ EOS
             name:                  'bond0',
             provider:              :iproute2,
             state:                 Puppet::Util::Network::Up,
-            type:                  Puppet::Util::Network::Bonding,
         }
       )
     end
@@ -156,7 +151,6 @@ EOS
             provider:  :iproute2,
             state:     Puppet::Util::Network::Up,
             vlanid:    100,
-            type:      Puppet::Util::Network::Vlan,
         }
       )
     end
@@ -173,7 +167,6 @@ EOS
               provider:  :iproute2,
               state:     Puppet::Util::Network::Up,
               vlanid:    200,
-              type:      Puppet::Util::Network::Vlan,
           }
       )
     end
@@ -335,10 +328,8 @@ EOS
             name:      'eth1',
             provider:  :iproute2,
             state:     Puppet::Util::Network::Up,
-            type:      Puppet::Util::Network::Ethernet,
         )
       end
-
 
       it 'with all params' do
         provider.stubs(:interface_exists?).returns true
@@ -369,7 +360,6 @@ EOS
             provider:  :iproute2,
             state:     Puppet::Util::Network::Up,
             vlanid:    100,
-            type:      Puppet::Util::Network::Vlan
         )
       end
 
@@ -397,7 +387,6 @@ EOS
             name:     'bond0',
             provider: :iproute2,
             state:    Puppet::Util::Network::Up,
-            type:     Puppet::Util::Network::Bonding,
         )
       end
 

@@ -13,7 +13,6 @@ module Puppet::Util::Network
     },
     vlan: {
       name_regexp: /\Avlan([2-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-5])\Z/,
-      vlanid_regexp: /\A([2-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-5])\Z/,
     },
     ethernet: {
       name_regexp: /\A([[:alpha:]]*(?:[[:alpha:]]\d+)+)\Z/,
@@ -40,7 +39,6 @@ module Puppet::Util::Network
     Down,
     Up,
   ]
-
 
   Bondable = [
     :ethernet,

@@ -20,7 +20,7 @@ Puppet::Type.type(:network_interface).newparam(:vlanid) do
   defaultto Puppet::Util::Network::Vlan1
 
   munge do |value|
-    if resource[:type] == :vlan
+    if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan
       Integer(Puppet::Util::Network::Interfaces[:vlan][:name_regexp].match(resource[:name])[1])
     else
       nil
