@@ -114,7 +114,7 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:state) do
     desc 'State of this interface.'
     newvalues(:up, :down)
-    defaultto :up
+    defaultto(:up)
   end
 
   ##
@@ -139,19 +139,19 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:bond_miimon) do
     desc 'Specifies the MII link monitoring frequency in milliseconds.'
 
+    newvalues(/\A\d+\Z/)
     defaultto do
       if /\Abond\d+\Z/ =~ resource[:name]
         100
       else
         nil
       end
+    end
 
     validate do |value|
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
       fail 'Invalid value \'%{value}\'. Valid values are 0-1000.' % { value: value } unless value >= 0 and value <= 1000
     end
-
-    newvalues(/\A\d+\Z/)
   end
 
   newproperty(:bond_mode) do

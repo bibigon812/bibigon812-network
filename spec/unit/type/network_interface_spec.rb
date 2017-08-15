@@ -51,8 +51,6 @@ describe described_type do
 
       it 'should support :disabled' do
         expect { described_class.new(name: 'eth0', ensure: :disabled) }.to raise_error Puppet::Error, /Invalid value/
-<<<<<<< HEAD
-=======
       end
     end
 
@@ -161,7 +159,6 @@ describe described_type do
         it "should contain #{xmit_hash_policy}" do
           expect(described_class.new(name: 'bond0', bond_xmit_hash_policy: xmit_hash_policy)[:bond_xmit_hash_policy]).to eq(:"#{xmit_hash_policy}")
         end
->>>>>>> roll_back
       end
     end
 
@@ -180,8 +177,6 @@ describe described_type do
 
       it 'should contain 10.0.0.1' do
         expect(described_class.new(name: 'eth0', ipaddress: '10.0.0.1/24')[:ipaddress]).to eq(['10.0.0.1/24'])
-<<<<<<< HEAD
-=======
       end
     end
 
@@ -204,7 +199,6 @@ describe described_type do
 
       it 'should not support \'\' as a value' do
         expect { described_class.new(name: 'eth0', mac: '') }.to raise_error Puppet::Error, /Invalid value/
->>>>>>> roll_back
       end
     end
 
@@ -226,7 +220,6 @@ describe described_type do
       end
     end
 
-<<<<<<< HEAD
     describe 'state' do
       it 'should contain :up' do
         expect(described_class.new(name: 'eth0')[:state]).to eq(:up)
@@ -240,8 +233,7 @@ describe described_type do
         expect(described_class.new(name: 'eth0')[:state]).to eq(:up)
       end
     end
-  end
-=======
+
     describe 'parent' do
       it 'should support eth0 as value' do
         expect { described_class.new(name: 'eth0', parent: 'eth0') }.to raise_error Puppet::Error, /Invalid value/
@@ -309,5 +301,4 @@ describe described_type do
       expect(bond_reqs[0].target).to eq(bond)
     end
   end
->>>>>>> roll_back
 end
