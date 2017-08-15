@@ -62,33 +62,6 @@ define network::interface::config (
   $env = $::environment
   $interface_name = $name
 
-  if empty($ipaddress) {
-    $ipaddr = undef
-    $prefix = undef
-  } else {
-    $ipaddr_prefix = split($ipaddress[0], '/')
-    $ipaddr = $ipaddr_prefix[0]
-    $prefix = $ipaddr_prefix[1]
-
-    # aliases
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].each |Integer $index| {
-      if $ipaddress[$index] {
-        $ipaddr_prefix = split($ipaddress[$index], '/')
-        $ipaddr = $ipaddr_prefix[0]
-        $prefix = $ipaddr_prefix[1]
-
-        file {"${config_dir}/ifcfg-${name}:${index}":
-          ensure  => $ensure,
-          content => template("network/${facts['os']['family']}/ifcfg-alias.erb"),
-        }
-      } else {
-        file {"${config_dir}/ifcfg-${name}:${index}":
-          ensure => absent,
-        }
-      }
-    }
-  }
-
   # Add interface configs
   file {"${config_dir}/ifcfg-${name}":
     ensure  => $ensure,

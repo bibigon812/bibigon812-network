@@ -5,11 +5,11 @@ BOOTPROTO=none
 <% unless @interface_name.nil? -%>
 DEVICE=<%= @interface_name %>
 <% end -%>
-<% unless @ipaddr.nil? -%>
-IPADDR=<%= @ipaddr %>
-<% end -%>
-<% unless @prefix.nil? -%>
-PREFIX=<%= @prefix %>
+<% index = 0 -%>
+<% @ipaddress.each do |ipaddress| -%>
+IPADDR<% unless index == 0 %><%= index %><% end %>=<%= ipaddress.split(/\//).first %>
+PREFIX<% unless index == 0 %><%= index %><% end %>=<%= ipaddress.split(/\//).last %>
+<% index += 1 -%>
 <% end -%>
 <% unless @mac.nil? -%>
 MACADDR=<%= @mac %>

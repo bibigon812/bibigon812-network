@@ -103,6 +103,10 @@ BOOTPROTO=none
 DEVICE=bond0
 IPADDR=10.0.0.1
 PREFIX=24
+IPADDR1=172.16.0.1
+PREFIX1=24
+IPADDR2=192.168.0.1
+PREFIX2=24
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
@@ -110,38 +114,6 @@ BONDING_OPTS="mode=802.3ad miimon=100 lacp_rate=fast xmit_hash_policy=layer2"
 TYPE=Bond
 OES
         )
-    end
-
-    it 'should contain ifcfg-bond0' do
-      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:1').with_content(<<-OES
-#
-# Managed by Puppet in the sandbox environment
-#
-BOOTPROTO=none
-DEVICE=bond0:1
-IPADDR=172.16.0.1
-PREFIX=24
-ONBOOT=yes
-USERCTL=no
-NM_CONTROLLED=no
-OES
-      )
-    end
-
-    it 'should contain ifcfg-bond0:2' do
-      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0:2').with_content(<<-OES
-#
-# Managed by Puppet in the sandbox environment
-#
-BOOTPROTO=none
-DEVICE=bond0:2
-IPADDR=192.168.0.1
-PREFIX=24
-ONBOOT=yes
-USERCTL=no
-NM_CONTROLLED=no
-OES
-      )
     end
   end
 
@@ -217,7 +189,7 @@ OES
       }
     end
 
-    it do
+    it 'should contain ifcfg-lo' do
       is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-lo').with_content(<<-OES
 #
 # Managed by Puppet in the sandbox environment
@@ -226,22 +198,8 @@ BOOTPROTO=none
 DEVICE=lo
 IPADDR=127.0.0.1
 PREFIX=8
-ONBOOT=yes
-USERCTL=no
-NM_CONTROLLED=no
-OES
-      )
-    end
-
-    it do
-      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-lo:1').with_content(<<-OES
-#
-# Managed by Puppet in the sandbox environment
-#
-BOOTPROTO=none
-DEVICE=lo:1
-IPADDR=10.0.0.1
-PREFIX=32
+IPADDR1=10.0.0.1
+PREFIX1=32
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
