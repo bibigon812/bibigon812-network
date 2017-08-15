@@ -16,7 +16,7 @@ define network::interface (
   Array
   $routes = [],
 
-  Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
+  Optional[Enum['bonding', 'ethernet', 'gre', 'loopback', 'vlan']]
   $type = undef,
 
   Optional[Enum['fast', 'slow']]
@@ -58,16 +58,16 @@ define network::interface (
 
   $real_type = $type ? {
     undef   => $name ? {
-      /\Abond\d+\Z/  => 'bond',
+      /\Abond\d+\Z/  => 'bonding',
       /\Avlan\d+\Z/  => 'vlan',
-      /\A\w+\.\d+\Z/ => 'vlan',
+      /\Agre\d+\Z/   => 'gre',
       /\Alo\Z/       => 'loopback',
-      default        => 'hw',
+      default        => 'ethernet',
     },
     default => $type,
   }
 
-  if $real_type == 'bond' {
+  if $real_type == 'bonding' {
     $real_bond_lacp_rate = $bond_lacp_rate ? {
       undef   => 'slow',
       default => $bond_lacp_rate,
