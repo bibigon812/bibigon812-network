@@ -23,12 +23,10 @@ Puppet::Type.newtype(:network_interface) do
   newparam(:type) do
     desc 'Type of this iterface.'
 
-    defaultto do
-      Puppet::Util::Network::get_interface_type(resource[:name])
-    end
+    defaultto { Puppet::Util::Network::get_interface_type(resource[:name]) }
 
-    Puppet::Util::Network::Interfaces.each_key do |interface_type|
-      newvalues(interface_type)
+    munge do |value|
+      Puppet::Util::Network::get_interface_type(resource[:name])
     end
   end
 
@@ -195,13 +193,7 @@ Puppet::Type.newtype(:network_interface) do
   newparam(:vlanid) do
     desc 'Contains a vlanid.'
 
-    defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan
-        Puppet::Util::Network::Vlan1
-      else
-        nil
-      end
-    end
+    defaultto(Puppet::Util::Network::Vlan1)
 
     munge do |value|
       if resource[:type] == Puppet::Util::Network::Vlan
