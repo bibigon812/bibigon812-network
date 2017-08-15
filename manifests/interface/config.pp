@@ -22,7 +22,7 @@ define network::interface::config (
   Array
   $routes = [],
 
-  Optional[Enum['bond', 'hw', 'loopback', 'vlan']]
+  Optional[Enum['bonding', 'ethernet', 'gre', 'loopback', 'vlan']]
   $type = undef,
 
   Optional[Enum['fast', 'slow']]

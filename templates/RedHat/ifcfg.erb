@@ -21,7 +21,7 @@ MASTER=<%= @master %>
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
-<% if @type == 'bond' -%>
+<% if @type == 'bonding' -%>
 BONDING_OPTS="<% unless @bond_mode.nil? %>mode=<%= @bond_mode %><% end %><% unless @bond_miimon.nil? %> miimon=<%= @bond_miimon %><% end %><% unless @bond_lacp_rate.nil? %> lacp_rate=<%= @bond_lacp_rate %><% end %><% unless @bond_xmit_hash_policy.nil? %> xmit_hash_policy=<%= @bond_xmit_hash_policy %><% end %>"
 TYPE=Bond
 <% elsif @type == 'vlan' -%>
@@ -30,6 +30,6 @@ TYPE=Ethernet
 <% unless @parent.nil? -%>
 PHYSDEV=<%= @parent %>
 <% end -%>
-<% elsif @type == 'hw' -%>
+<% elsif @type == 'ethernet' -%>
 TYPE=Ethernet
 <% end -%>

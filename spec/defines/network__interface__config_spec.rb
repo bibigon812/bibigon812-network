@@ -28,7 +28,7 @@ describe 'network::interface::config' do
       {
           ipaddress:  %w{10.0.0.1/24},
           config_dir: '/etc/sysconfig/network-scripts',
-          type:       :hw,
+          type:       :ethernet,
           routes:     [
               {
                   ensure: :present,
@@ -90,7 +90,7 @@ TYPE=Ethernet
           bond_xmit_hash_policy: :layer2,
           ipaddress:             %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
           config_dir:            '/etc/sysconfig/network-scripts',
-          type:                  :bond,
+          type:                  :bonding,
       }
     end
 
@@ -140,36 +140,6 @@ PREFIX=24
 ONBOOT=yes
 USERCTL=no
 NM_CONTROLLED=no
-OES
-      )
-    end
-  end
-
-  context 'bond0.100' do
-    let(:title) { 'bond0.100' }
-    let(:params) do
-      {
-          ipaddress: %w{10.0.0.1/24},
-          config_dir: '/etc/sysconfig/network-scripts',
-          type: :vlan,
-          vlanid: 100,
-      }
-    end
-
-    it 'should contain ifcfg-bond0.100' do
-      is_expected.to contain_file('/etc/sysconfig/network-scripts/ifcfg-bond0.100').with_content(<<-OES
-#
-# Managed by Puppet in the sandbox environment
-#
-BOOTPROTO=none
-DEVICE=bond0.100
-IPADDR=10.0.0.1
-PREFIX=24
-ONBOOT=yes
-USERCTL=no
-NM_CONTROLLED=no
-VLAN=yes
-TYPE=Ethernet
 OES
       )
     end
