@@ -1,6 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),"..",".."))
-require 'puppet/util/network'
-
 Puppet::Type.newtype(:network_interface) do
   @doc = %q{
     This type provides the capabilities to manage generic parameters

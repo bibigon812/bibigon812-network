@@ -154,9 +154,9 @@ EOS
           name:      'vlan100',
           parent:    'bond0',
           provider:  :iproute2,
-          state:     Puppet::Util::Network::Up,
+          state:     :up,
           vlanid:    100,
-          type:      Puppet::Util::Network::Vlan,
+          type:      :vlan,
         }
       )
     end
@@ -171,9 +171,9 @@ EOS
           name:      'vlan200',
           parent:    'bond0',
           provider:  :iproute2,
-          state:     Puppet::Util::Network::Up,
+          state:     :up,
           vlanid:    200,
-          type:      Puppet::Util::Network::Vlan,
+          type:      :vlan,
         }
       )
     end
@@ -334,8 +334,8 @@ EOS
           mtu:       1500,
           name:      'eth1',
           provider:  :iproute2,
-          state:     Puppet::Util::Network::Up,
-          type:      Puppet::Util::Network::Ethernet,
+          state:     :up,
+          type:      :ethernet,
         )
       end
 
@@ -367,9 +367,9 @@ EOS
           mtu:       1500,
           name:      'vlan100',
           provider:  :iproute2,
-          state:     Puppet::Util::Network::Up,
+          state:     :up,
           vlanid:    100,
-          type:      Puppet::Util::Network::Vlan
+          type:      :vlan
         )
       end
 

@@ -1,6 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),"..",".."))
-require 'puppet/util/network'
-
 Puppet::Type.type(:network_interface).provide(:iproute2) do
   @doc = 'Manages network interface parameters.'
 
@@ -210,7 +207,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     debug 'Shutdown the interface %{name}.' % { name: @property_hash[:name] }
 
-    self.state = Puppet::Util::Network::Down
+    self.state = :down
 
     if @property_hash[:type] == :bonding
       destroy_bonding
@@ -481,7 +478,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def vlanid=(value)
-    return unless self.type == Puppet::Util::Network::Vlan
+    return unless self.type == :vlan
 
     ip(['link', 'add', 'name', @property_hash[:name], 'link', @property_hash[:parent], 'type', 'vlan', 'id', value.to_s])
     @property_hash[:vlanid] = value
@@ -489,23 +486,13 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
 
   private
-  def add
-    :add
-  end
-
-
-  def delete
-    :delete
-  end
-
-
   def add_bond_slaves(bond, slaves)
-    manage_bond_slaves(bond, slaves, add) unless slaves.empty?
+    manage_bond_slaves(bond, slaves, :add) unless slaves.empty?
   end
 
 
   def delete_bond_slaves(bond, slaves)
-    manage_bond_slaves(bond, slaves, delete) unless slaves.empty?
+    manage_bond_slaves(bond, slaves, :delete) unless slaves.empty?
   end
 
 
@@ -538,11 +525,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def manage_bond_slaves(bond, slaves, command = add)
+  def manage_bond_slaves(bond, slaves, command = :add)
     # Exit if no bond interface
     return unless interface_is_bonding?(bond)
 
-    prefix = command == delete ? '-' : '+'
+    prefix = command == :delete ? '-' : '+'
 
     slaves.each do |slave|
       next unless interface_exists?(slave)
