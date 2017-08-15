@@ -31,18 +31,18 @@ describe 'network::interface::config' do
           type:       :hw,
           routes:     [
               {
-                  ensure:  :present,
-                  device:  'eth0',
-                  metric:  100,
-                  nexthop: '192.168.0.1',
-                  prefix:  '10.0.0.0/8',
+                  ensure: :present,
+                  dev:    'eth0',
+                  metric: 100,
+                  via:    '192.168.0.1',
+                  prefix: '10.0.0.0/8',
               },
               {
-                  ensure:  :present,
-                  device:  'eth0',
-                  metric:  0,
-                  nexthop: '192.168.0.1',
-                  prefix:  '172.16.0.0/12',
+                  ensure: :present,
+                  dev:    'eth0',
+                  metric: 0,
+                  via:    '192.168.0.1',
+                  prefix: '172.16.0.0/12',
               },
           ],
       }

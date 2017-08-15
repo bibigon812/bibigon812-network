@@ -12,8 +12,8 @@ network::interfaces:
       - 192.168.0.1/24
 network::routes:
   192.168.0.0/24:
-    device: bond0.100
-    nexthop: 10.0.0.100
+    dev: bond0.100
+    via: 10.0.0.100
   192.168.0.0/24 100:
-    device: bond0.100
-    nexthop: 10.0.0.101
+    dev: bond0.100
+    via: 10.0.0.101
