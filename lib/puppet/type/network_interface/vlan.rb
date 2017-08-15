@@ -17,13 +17,20 @@ end
 Puppet::Type.type(:network_interface).newparam(:vlanid) do
   desc 'Contains a vlanid.'
 
-  defaultto Puppet::Util::Network::Vlan1
-
-  munge do |value|
+  defaultto do
     if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan
       Integer(Puppet::Util::Network::Interfaces[:vlan][:name_regexp].match(resource[:name])[1])
     else
       nil
     end
+  end
+
+  validate do |value|
+    unless Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan
+      fail 'The interface %{name} cannot have the vlanid.' % {name: resource[:name]}
+    end
+
+    fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % {value: value} unless value.is_a?(Integer)
+    fail 'Invalid value \'%{value}\'. Valid values are 1-4095.' % {value: value} unless value >= 1 and value <= 4095
   end
 end
