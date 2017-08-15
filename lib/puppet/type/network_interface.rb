@@ -9,41 +9,47 @@ Puppet::Type.newtype(:network_interface) do
 
   ensurable do
     defaultvalues
-    defaultto :present
+    defaultto(:present)
   end
 
   newparam(:name, namevar: true) do
     desc 'Interface name.'
-
-    Puppet::Util::Network::Interfaces.each_value do |opts|
-      newvalues(opts[:name_regexp])
-    end
+    newvalues(/\Abond\d+?\Z/)
+    newvalues(/\Avlan\d+\Z/)
+    newvalues(/\A([[:alpha:]]*([[:alpha:]]\d+)+)\Z/)
+    newvalues(/\Alo\Z/)
   end
 
   newparam(:type) do
-    desc 'Type of this iterface.'
+    desc 'Type of this interface.'
 
-    defaultto { Puppet::Util::Network::get_interface_type(resource[:name]) }
-
-    munge do |value|
-      Puppet::Util::Network::get_interface_type(resource[:name])
+    newvalues(:bonding, :ethernet, :loopback, :unknown, :vlan)
+    defaultto do
+      case resource[:name]
+      when /\Alo\Z/
+        :loopback
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
+        :vlan
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
+      else
+        :unknown
+      end
     end
   end
 
-  ##
-  ## Generic
-  ##
   newproperty(:ipaddress, array_matching: :all) do
     desc 'Specifies a list of IP addresses.'
 
-    defaultto([])
     validate do |value|
       begin
-        IPAddr.new(value)
+        IPAddr.new value
       rescue
-        fail('Invalid value \'%{value}\'. It is not a IP address.' % { value: value })
+        fail 'Invalid value \'%{value}\'. It is not a IP address.' % { value: value }
       end
-      fail('Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value }) unless value.include?('/')
+      fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value } unless value.include?('/')
     end
 
     def insync?(is)
@@ -57,6 +63,14 @@ Puppet::Type.newtype(:network_interface) do
 
       true
     end
+
+    defaultto([])
+  end
+
+  newproperty(:mac) do
+    desc 'Specifies a MAC address.'
+
+    newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
   end
 
   newproperty(:mtu) do
@@ -68,18 +82,39 @@ Puppet::Type.newtype(:network_interface) do
     end
   end
 
+  newproperty(:parent) do
+    desc 'Specifies a parent interface.'
+    defaultto do
+      if resource[:name].include?('.')
+        resource[:name].split('.').first
+      else
+        nil
+      end
+    end
+
+    validate do |value|
+      type =
+      case resource[:name]
+      when /\Alo\Z/
+        :loopback
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
+        :vlan
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
+      else
+        :unknown
+      end
+
+      fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :ethernet
+    end
+  end
+
   newproperty(:state) do
     desc 'State of this interface.'
     newvalues(:up, :down)
     defaultto :up
-  end
-
-  ##
-  ## Ethernet
-  ##
-  newproperty(:mac) do
-    desc 'Specifies a MAC address.'
-    newvalues(/\A(\h\h(?::|-)?){5}\h\h\Z/)
   end
 
   ##
@@ -91,26 +126,29 @@ Puppet::Type.newtype(:network_interface) do
       LACPDU packets in 802.3ad mode.
     }
 
+    newvalues(:slow, :fast)
     defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+      if /\Abond\d+\Z/ =~ resource[:name]
         :slow
       else
         nil
       end
     end
-
-    newvalues(:slow, :fast)
   end
 
   newproperty(:bond_miimon) do
     desc 'Specifies the MII link monitoring frequency in milliseconds.'
 
     defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+      if /\Abond\d+\Z/ =~ resource[:name]
         100
       else
         nil
       end
+
+    validate do |value|
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 0-1000.' % { value: value } unless value >= 0 and value <= 1000
     end
 
     newvalues(/\A\d+\Z/)
@@ -119,33 +157,18 @@ Puppet::Type.newtype(:network_interface) do
   newproperty(:bond_mode) do
     desc 'Specifies one of the bonding policies.'
 
+    newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
     defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+      if /\Abond\d+\Z/ =~ resource[:name]
         '802.3ad'
       else
         nil
       end
     end
-
-    newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
   end
 
   newproperty(:bond_slaves, array_matching: :all) do
     desc 'Specifies a list of the bonding slaves.'
-
-    defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
-        []
-      else
-        nil
-      end
-    end
-
-    validate do |value|
-      unless Puppet::Util::Network::Bondable.include? Puppet::Util::Network::get_interface_type(value)
-        fail 'Invalid value. The interface %{value} cannot be a bond slave.' % {value: value}
-      end
-    end
 
     def insync?(is)
       is.each do |value|
@@ -158,49 +181,61 @@ Puppet::Type.newtype(:network_interface) do
 
       true
     end
+
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        []
+      else
+        nil
+      end
+    end
   end
 
   newproperty(:bond_xmit_hash_policy) do
     desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
 
+    newvalues('layer2', 'layer3+4')
     defaultto do
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Bonding
+      if /\Abond\d+\Z/ =~ resource[:name]
         'layer3+4'
       else
         nil
       end
     end
-
-    newvalues('layer2', 'layer3+4')
   end
 
   ##
   ## Vlan
   ##
-  newproperty(:parent) do
-    desc 'Specifies a parent interface.'
+  newproperty(:vlanid) do
+    desc 'Vlan ID.'
 
-    validate do |value|
-      unless Puppet::Util::Network::Vlanable.include? Puppet::Util::Network::get_interface_type(value)
-        fail 'Invalid value. The interface \'%{value}\' cannot have vlan.' % {value: value}
-      end
-      if Puppet::Util::Network::get_interface_type(resource[:name]) == Puppet::Util::Network::Vlan and value.nil?
-        fail 'Invalid value. The parent interface is not specified.'
-      end
-    end
-  end
-
-  newparam(:vlanid) do
-    desc 'Contains a vlanid.'
-
-    defaultto(Puppet::Util::Network::Vlan1)
-
-    munge do |value|
-      if resource[:type] == Puppet::Util::Network::Vlan
-        Integer(Puppet::Util::Network::Interfaces[:vlan][:name_regexp].match(resource[:name])[1])
+    defaultto do
+      if /\Avlan(\d+)\Z/ =~ resource[:name]
+        Integer($1)
       else
         nil
       end
+    end
+
+    validate do |value|
+      type =
+      case resource[:name]
+      when /\Alo\Z/
+        :loopback
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
+        :vlan
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
+      else
+        :unknown
+      end
+
+      fail 'Invalid value \'%{value}\'. This interface type does not support tagging.' % { value: value } unless type == :vlan
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 1-4095.' % { value: value } unless value >= 1 and value <= 4095
     end
   end
 
@@ -210,14 +245,8 @@ Puppet::Type.newtype(:network_interface) do
   autorequire(:network_interface) do
     reqs = []
 
-    if self[:type] == Puppet::Util::Network::Vlan
-      reqs << self[:parent] unless self[:parent].nil?
-
-    elsif self[:type] == Puppet::Util::Network::Bonding
-      self[:bond_slaves].each do |slave|
-        reqs << slave
-      end
-    end
+    reqs += self[:bond_slaves] if self[:type] == :bonding
+    reqs << self[:parent] if self[:parent]
 
     reqs
   end

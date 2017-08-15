@@ -74,38 +74,38 @@ EOS
           mtu:       65536,
           name:      'lo',
           provider:  :iproute2,
-          state:     Puppet::Util::Network::Up,
-          type:      Puppet::Util::Network::Loopback,
+          state:     :up,
+          type:      :loopback,
         }
       )
     end
 
     it 'should return the resource eth0' do
       expect(described_class.instances[1].instance_variable_get('@property_hash')).to eq(
-          {
-              ensure:    :present,
-              ipaddress: %w{10.0.2.15/24},
-              mac:       '08:00:27:1d:5a:fb',
-              mtu:       1500,
-              name:      'eth0',
-              provider:  :iproute2,
-              state:     Puppet::Util::Network::Up,
-              type:      Puppet::Util::Network::Ethernet,
-          }
+        {
+          ensure:    :present,
+          ipaddress: %w{10.0.2.15/24},
+          mac:       '08:00:27:1d:5a:fb',
+          mtu:       1500,
+          name:      'eth0',
+          provider:  :iproute2,
+          state:     :up,
+          type:      :ethernet,
+        }
       )
     end
 
     it 'should return the resource eth1' do
       expect(described_class.instances[2].instance_variable_get('@property_hash')).to eq(
         {
-            ensure:    :present,
-            ipaddress: %w{172.16.32.103/24},
-            mac:       '08:00:27:9c:76:49',
-            mtu:       1500,
-            name:      'eth1',
-            provider:  :iproute2,
-            state:     Puppet::Util::Network::Up,
-            type:      Puppet::Util::Network::Ethernet,
+          ensure:    :present,
+          ipaddress: %w{172.16.32.103/24},
+          mac:       '08:00:27:9c:76:49',
+          mtu:       1500,
+          name:      'eth1',
+          provider:  :iproute2,
+          state:     :up,
+          type:      :ethernet,
         }
       )
     end
@@ -113,13 +113,13 @@ EOS
     it 'should return the resource ip_vti0' do
       expect(described_class.instances[3].instance_variable_get('@property_hash')).to eq(
         {
-            ensure:    :present,
-            ipaddress: [],
-            mtu:       1500,
-            name:      'ip_vti0',
-            provider:  :iproute2,
-            state:     Puppet::Util::Network::Down,
-            type:      Puppet::Util::Network::Unknown,
+          ensure:    :present,
+          ipaddress: [],
+          mtu:       1500,
+          name:      'ip_vti0',
+          provider:  :iproute2,
+          state:     :down,
+          type:      :unknown,
         }
       )
     end
@@ -127,19 +127,19 @@ EOS
     it 'should return the resource bond0' do
       expect(described_class.instances[4].instance_variable_get('@property_hash')).to eq(
         {
-            bond_lacp_rate:        :slow,
-            bond_miimon:           100,
-            bond_mode:             '802.3ad',
-            bond_slaves:           [],
-            bond_xmit_hash_policy: 'layer3+4',
-            ensure:                :present,
-            ipaddress:             [],
-            mac:                   '08:00:27:9c:76:49',
-            mtu:                   1500,
-            name:                  'bond0',
-            provider:              :iproute2,
-            state:                 Puppet::Util::Network::Up,
-            type:                  Puppet::Util::Network::Bonding,
+          bond_lacp_rate:        :slow,
+          bond_miimon:           100,
+          bond_mode:             '802.3ad',
+          bond_slaves:           [],
+          bond_xmit_hash_policy: 'layer3+4',
+          ensure:                :present,
+          ipaddress:             [],
+          mac:                   '08:00:27:9c:76:49',
+          mtu:                   1500,
+          name:                  'bond0',
+          provider:              :iproute2,
+          state:                 :up,
+          type:                  :bonding,
         }
       )
     end
@@ -147,58 +147,58 @@ EOS
     it 'should return the resource vlan100' do
       expect(described_class.instances[5].instance_variable_get('@property_hash')).to eq(
         {
-            ensure:    :present,
-            ipaddress: %w{172.16.33.103/24},
-            mac:       '08:00:27:9c:76:49',
-            mtu:       1500,
-            name:      'vlan100',
-            parent:    'bond0',
-            provider:  :iproute2,
-            state:     Puppet::Util::Network::Up,
-            vlanid:    100,
-            type:      Puppet::Util::Network::Vlan,
+          ensure:    :present,
+          ipaddress: %w{172.16.33.103/24},
+          mac:       '08:00:27:9c:76:49',
+          mtu:       1500,
+          name:      'vlan100',
+          parent:    'bond0',
+          provider:  :iproute2,
+          state:     Puppet::Util::Network::Up,
+          vlanid:    100,
+          type:      Puppet::Util::Network::Vlan,
         }
       )
     end
 
     it 'should return the resource vlan200' do
       expect(described_class.instances[6].instance_variable_get('@property_hash')).to eq(
-          {
-              ensure:    :present,
-              ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
-              mac:       '08:00:27:9c:76:49',
-              mtu:       1500,
-              name:      'vlan200',
-              parent:    'bond0',
-              provider:  :iproute2,
-              state:     Puppet::Util::Network::Up,
-              vlanid:    200,
-              type:      Puppet::Util::Network::Vlan,
-          }
+        {
+          ensure:    :present,
+          ipaddress: %w{10.0.0.1/24 172.16.0.1/24 192.168.0.1/24},
+          mac:       '08:00:27:9c:76:49',
+          mtu:       1500,
+          name:      'vlan200',
+          parent:    'bond0',
+          provider:  :iproute2,
+          state:     Puppet::Util::Network::Up,
+          vlanid:    200,
+          type:      Puppet::Util::Network::Vlan,
+        }
       )
     end
   end
 
   let(:provider) do
     described_class.new(
-        ensure:    :present,
-        ipaddress: [],
-        mtu:       1500,
-        name:      'eth1',
-        provider:  :iproute2,
+      ensure:    :present,
+      ipaddress: [],
+      mtu:       1500,
+      name:      'eth1',
+      provider:  :iproute2,
     )
   end
 
   let(:resource) do
     Puppet::Type.type(:network_interface).new(
-        name: 'eth1',
+      name: 'eth1',
     )
   end
 
   describe 'prefetch' do
     let(:resources) do
       {
-          eth1: resource
+        eth1: resource
       }
     end
 
@@ -226,10 +226,10 @@ EOS
     context 'an ethernet interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            name:      'eth1',
-            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac:       '01:23:45:67:89:ab',
-            mtu:       1500
+          name:      'eth1',
+          ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+          mac:       '01:23:45:67:89:ab',
+          mtu:       1500
         )
       end
       it 'with all params' do
@@ -241,11 +241,11 @@ EOS
     context 'a vlan interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            name:      'vlan100',
-            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac:       '01:23:45:67:89:ab',
-            mtu:       1500,
-            parent:    'eth0'
+          name:      'vlan100',
+          ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+          mac:       '01:23:45:67:89:ab',
+          mtu:       1500,
+          parent:    'eth0'
         )
       end
 
@@ -264,11 +264,11 @@ EOS
     context 'a bond interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            bond_slaves: ['eth0',],
-            name:        'bond0',
-            ipaddress:   [],
-            mac:         '01:23:45:67:89:ab',
-            mtu:         1500
+          bond_slaves: ['eth0',],
+          name:        'bond0',
+          ipaddress:   [],
+          mac:         '01:23:45:67:89:ab',
+          mtu:         1500
         )
       end
 
@@ -319,23 +319,23 @@ EOS
     context 'an ethernet interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            ensure:    :absent,
-            name:      'eth1',
-            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac:       '01:23:45:67:89:ab',
-            mtu:       1500
+          ensure:    :absent,
+          name:      'eth1',
+          ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+          mac:       '01:23:45:67:89:ab',
+          mtu:       1500
         )
       end
 
       let(:provider) do
         described_class.new(
-            ensure:    :present,
-            ipaddress: [],
-            mtu:       1500,
-            name:      'eth1',
-            provider:  :iproute2,
-            state:     Puppet::Util::Network::Up,
-            type:      Puppet::Util::Network::Ethernet,
+          ensure:    :present,
+          ipaddress: [],
+          mtu:       1500,
+          name:      'eth1',
+          provider:  :iproute2,
+          state:     Puppet::Util::Network::Up,
+          type:      Puppet::Util::Network::Ethernet,
         )
       end
 
@@ -351,25 +351,25 @@ EOS
     context 'a vlan interface' do
       let(:resource) do
         Puppet::Type.type(:network_interface).new(
-            ensure:    :absent,
-            name:      'vlan100',
-            ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
-            mac:       '01:23:45:67:89:ab',
-            mtu:       1500,
-            parent:    'eth0'
+          ensure:    :absent,
+          name:      'vlan100',
+          ipaddress: %w{10.255.255.1/24 172.31.255.1/24},
+          mac:       '01:23:45:67:89:ab',
+          mtu:       1500,
+          parent:    'eth0'
         )
       end
 
       let(:provider) do
         described_class.new(
-            ensure:    :present,
-            ipaddress: [],
-            mtu:       1500,
-            name:      'vlan100',
-            provider:  :iproute2,
-            state:     Puppet::Util::Network::Up,
-            vlanid:    100,
-            type:      Puppet::Util::Network::Vlan
+          ensure:    :present,
+          ipaddress: [],
+          mtu:       1500,
+          name:      'vlan100',
+          provider:  :iproute2,
+          state:     Puppet::Util::Network::Up,
+          vlanid:    100,
+          type:      Puppet::Util::Network::Vlan
         )
       end
 
@@ -394,10 +394,10 @@ EOS
     context 'an bond interface' do
       let(:provider) do
         described_class.new(
-            name:     'bond0',
-            provider: :iproute2,
-            state:    Puppet::Util::Network::Up,
-            type:     Puppet::Util::Network::Bonding,
+          name:     'bond0',
+          provider: :iproute2,
+          state:    :up,
+          type:     :bonding,
         )
       end
 

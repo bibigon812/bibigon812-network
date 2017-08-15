@@ -61,7 +61,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
         name, parent = name_and_parent.split('@')
 
-        type = Puppet::Util::Network::get_interface_type(name)
+        type = get_interface_type(name)
 
         # Add hash to providers
         unless hash.empty?
@@ -94,12 +94,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
         end
 
         # Add bonding options
-        if type == Puppet::Util::Network::Bonding
+        if type == :bonding
           hash.merge!(instance_bond(name))
 
-
         # Add vlan options
-        elsif type == Puppet::Util::Network::Vlan
+        elsif type == :vlan
           hash.merge!(instance_vlan(name))
         end
 
@@ -154,17 +153,32 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     end
   end
 
+  def self.get_interface_type(name)
+    case name
+    when /\Alo\Z/
+      :loopback
+    when /\Abond\d+?\Z/
+      :bonding
+    when /\Avlan\d+\Z/
+      :vlan
+    when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+      :ethernet
+    else
+      :unknown
+    end
+  end
+
   def self.get_state(flags)
     if flags.include?('UP')
-      Puppet::Util::Network::Up
+      :up
     else
-      Puppet::Util::Network::Down
+      :down
     end
   end
 
   def create
     # Don't create hardware interface
-    if @resource[:type] == Puppet::Util::Network::Ethernet
+    if @resource[:type] == :ethernet
       notice 'Can not create the hardware interface.'
       return
     end
@@ -178,10 +192,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     @property_hash[:ensure] = :present
     self.type = @resource[:type]
 
-    if @resource[:type] == Puppet::Util::Network::Vlan
+    if @resource[:type] == :vlan
       create_vlan
 
-    elsif @resource[:type] == Puppet::Util::Network::Bonding
+    elsif @resource[:type] == :bonding
       create_bonding
     end
 
@@ -198,10 +212,10 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     self.state = Puppet::Util::Network::Down
 
-    if @property_hash[:type] == Puppet::Util::Network::Bonding
+    if @property_hash[:type] == :bonding
       destroy_bonding
 
-    elsif @property_hash[:type] == Puppet::Util::Network::Vlan
+    elsif @property_hash[:type] == :vlan
       destroy_vlan
 
     else
@@ -252,11 +266,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def state
-    @property_hash[:state] || Puppet::Util::Network::Unknown
+    @property_hash[:state] || :down
   end
 
   def state=(value)
-    if Puppet::Util::Network::States.include?(value)
+    if [:up, :down].include?(value)
       ip(['link', 'set', 'dev', @property_hash[:name], value.to_s])
     end
 
@@ -346,7 +360,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_lacp_rate=(value)
-    return unless self.type == Puppet::Util::Network::Bonding
+    return unless self.type == :bonding
 
     save_state_and_shutdown
 
@@ -366,7 +380,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_miimon=(value)
-    return unless self.type == Puppet::Util::Network::Bonding
+    return unless self.type == :bonding
 
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/miimon", value.to_s)
@@ -382,7 +396,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_mode=(value)
-    return unless self.type == Puppet::Util::Network::Bonding
+    return unless self.type == :bonding
 
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/mode", value.to_s)
@@ -398,7 +412,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_slaves=(value)
-    return unless self.type == Puppet::Util::Network::Bonding
+    return unless self.type == :bonding
 
     save_state_and_shutdown
     sync_bond_slaves(@property_hash[:name], self.bond_slaves, value)
@@ -412,7 +426,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def bond_xmit_hash_policy=(value)
-    return unless self.type == Puppet::Util::Network::Bonding
+    return unless self.type == :bonding
 
     begin
       File.write("/sys/class/net/#{@property_hash[:name]}/bonding/xmit_hash_policy", value.to_s)
@@ -440,7 +454,7 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
     if name.include?('vlan')
       Integer(/\Avlan(\d+)\Z/.match(name)[1])
     else
-      Puppet::Util::Network::VLAN1
+      1
     end
   end
 
@@ -545,9 +559,9 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
   def save_state_and_shutdown
     state = self.state
-    if state == Puppet::Util::Network::Up
+    if state == :up
       @state = state
-      self.state = Puppet::Util::Network::Down
+      self.state = :down
     end
   end
 
