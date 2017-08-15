@@ -35,7 +35,7 @@ describe Puppet::Type.type(:network_interface).provider(:iproute2) do
     link/ipip 0.0.0.0 brd 0.0.0.0
 5: bond0: <NO-CARRIER,BROADCAST,MULTICAST,MASTER,UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
-6: bond0.100@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+6: vlan100@bond0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
     link/ether 08:00:27:9c:76:49 brd ff:ff:ff:ff:ff:ff
     inet 172.16.33.103/24 brd 172.16.32.255 scope global eth1
        valid_lft forever preferred_lft forever
@@ -66,7 +66,7 @@ EOS
       expect(described_class.instances.size).to eq(7)
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource lo' do
       expect(described_class.instances[0].instance_variable_get('@property_hash')).to eq(
           {
               ensure:    :present,
@@ -75,7 +75,7 @@ EOS
               name:      'lo',
               provider:  :iproute2,
               state:     :up,
-              type:      :hw,
+              type:      :loopback,
           }
       )
     end
@@ -90,12 +90,12 @@ EOS
               name:      'eth0',
               provider:  :iproute2,
               state:     :up,
-              type:      :hw,
+              type:      :ethernet,
           }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource eth1' do
       expect(described_class.instances[2].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
@@ -105,12 +105,12 @@ EOS
             name:      'eth1',
             provider:  :iproute2,
             state:     :up,
-            type:      :hw,
+            type:      :ethernet,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource ip_vti0' do
       expect(described_class.instances[3].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
@@ -119,15 +119,15 @@ EOS
             name:      'ip_vti0',
             provider:  :iproute2,
             state:     :down,
-            type:      :hw,
+            type:      :unknown,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource bond0' do
       expect(described_class.instances[4].instance_variable_get('@property_hash')).to eq(
         {
-            bond_lacp_rate:        'slow',
+            bond_lacp_rate:        :slow,
             bond_miimon:           100,
             bond_mode:             '802.3ad',
             bond_slaves:           [],
@@ -139,19 +139,19 @@ EOS
             name:                  'bond0',
             provider:              :iproute2,
             state:                 :up,
-            type:                  :bond,
+            type:                  :bonding,
         }
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource vlan100' do
       expect(described_class.instances[5].instance_variable_get('@property_hash')).to eq(
         {
             ensure:    :present,
             ipaddress: %w{172.16.33.103/24},
             mac:       '08:00:27:9c:76:49',
             mtu:       1500,
-            name:      'bond0.100',
+            name:      'vlan100',
             parent:    'bond0',
             provider:  :iproute2,
             state:     :up,
@@ -161,7 +161,7 @@ EOS
       )
     end
 
-    it 'should return the resource eth0' do
+    it 'should return the resource vlan200' do
       expect(described_class.instances[6].instance_variable_get('@property_hash')).to eq(
           {
               ensure:    :present,
@@ -397,7 +397,7 @@ EOS
             name:     'bond0',
             provider: :iproute2,
             state:    :up,
-            type:     :bond,
+            type:     :bonding,
         )
       end
 

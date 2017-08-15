@@ -3,111 +3,35 @@ Puppet::Type.newtype(:network_interface) do
 
   ensurable do
     defaultvalues
-    defaultto :present
+    defaultto(:present)
   end
 
   newparam(:name, namevar: true) do
     desc 'Interface name.'
-    newvalues(/\Abond\d+(\.\d+)?\Z/)
+    newvalues(/\Abond\d+?\Z/)
     newvalues(/\Avlan\d+\Z/)
-    newvalues(/\A[[:alpha:]]+\w+(\.\d+)?\Z/)
+    newvalues(/\A([[:alpha:]]*([[:alpha:]]\d+)+)\Z/)
+    newvalues(/\Alo\Z/)
   end
 
   newparam(:type) do
     desc 'Type of this interface.'
 
-    newvalues(:bond, :hw, :loopback, :vlan)
-    defaultto {
-      if resource[:name] == 'lo'
+    newvalues(:bonding, :ethernet, :loopback, :unknown, :vlan)
+    defaultto do
+      case resource[:name]
+      when /\Alo\Z/
         :loopback
-      elsif resource[:name].include?('.') or resource[:name].include?('vlan')
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
         :vlan
-      elsif resource[:name].include?('bond')
-        :bond
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
       else
-        :hw
+        :unknown
       end
-    }
-  end
-
-  newproperty(:bond_lacp_rate) do
-    desc %q{Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode.}
-
-    newvalues(:slow, :fast)
-    defaultto {
-      if resource[:name].include?('bond') and not resource[:name].include?('.')
-        :slow
-      else
-        nil
-      end
-    }
-  end
-
-  newproperty(:bond_miimon) do
-    desc 'Specifies the MII link monitoring frequency in milliseconds.'
-
-    defaultto {
-      if resource[:name].include?('bond') and not resource[:name].include?('.')
-        100
-      else
-        nil
-      end
-    }
-
-    validate do |value|
-      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
-      fail 'Invalid value \'%{value}\'. Valid values are 0-1000.' % { value: value } unless value >= 0 and value <= 1000
     end
-  end
-
-  newproperty(:bond_mode) do
-    desc 'Specifies one of the bonding policies.'
-
-    newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
-    defaultto {
-      if resource[:name].include?('bond') and not resource[:name].include?('.')
-        '802.3ad'
-      else
-        nil
-      end
-    }
-  end
-
-  newproperty(:bond_slaves, array_matching: :all) do
-    desc 'Specifies a list of the bonding slaves.'
-
-    def insync?(is)
-      is.each do |value|
-        return false unless @should.include?(value)
-      end
-
-      @should.each do |value|
-        return false unless is.include?(value)
-      end
-
-      true
-    end
-
-    defaultto {
-      if resource[:name].include?('bond') and not resource[:name].include?('.')
-        []
-      else
-        nil
-      end
-    }
-  end
-
-  newproperty(:bond_xmit_hash_policy) do
-    desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
-
-    newvalues('layer2', 'layer3+4')
-    defaultto {
-      if resource[:name].include?('bond') and not resource[:name].include?('.')
-        'layer3+4'
-      else
-        nil
-      end
-    }
   end
 
   newproperty(:ipaddress, array_matching: :all) do
@@ -134,7 +58,7 @@ Puppet::Type.newtype(:network_interface) do
       true
     end
 
-    defaultto []
+    defaultto([])
   end
 
   newproperty(:mac) do
@@ -154,25 +78,30 @@ Puppet::Type.newtype(:network_interface) do
 
   newproperty(:parent) do
     desc 'Specifies a parent interface.'
-    defaultto {
+    defaultto do
       if resource[:name].include?('.')
         resource[:name].split('.').first
       else
         nil
       end
-    }
+    end
 
     validate do |value|
       type =
-          if resource[:name].include?('.') or resource[:name].include?('vlan')
-            :vlan
-          elsif resource[:name].include?('bond')
-            :bond
-          else
-            :eth
-          end
+      case resource[:name]
+      when /\Alo\Z/
+        :loopback
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
+        :vlan
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
+      else
+        :unknown
+      end
 
-      fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :eth
+      fail 'Invalid value \'%{value}\'. This interface type does not support parent interface.' % { value: value } if type == :ethernet
     end
   end
 
@@ -182,32 +111,117 @@ Puppet::Type.newtype(:network_interface) do
     defaultto :up
   end
 
+  ##
+  ## Bonding
+  ##
+  newproperty(:bond_lacp_rate) do
+    desc %q{Option specifying the rate in which we'll ask our link partner to transmit LACPDU packets in 802.3ad mode.}
+
+    newvalues(:slow, :fast)
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        :slow
+      else
+        nil
+      end
+    end
+  end
+
+  newproperty(:bond_miimon) do
+    desc 'Specifies the MII link monitoring frequency in milliseconds.'
+
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        100
+      else
+        nil
+      end
+    end
+
+    validate do |value|
+      fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
+      fail 'Invalid value \'%{value}\'. Valid values are 0-1000.' % { value: value } unless value >= 0 and value <= 1000
+    end
+  end
+
+  newproperty(:bond_mode) do
+    desc 'Specifies one of the bonding policies.'
+
+    newvalues('balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb')
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        '802.3ad'
+      else
+        nil
+      end
+    end
+  end
+
+  newproperty(:bond_slaves, array_matching: :all) do
+    desc 'Specifies a list of the bonding slaves.'
+
+    def insync?(is)
+      is.each do |value|
+        return false unless @should.include?(value)
+      end
+
+      @should.each do |value|
+        return false unless is.include?(value)
+      end
+
+      true
+    end
+
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        []
+      else
+        nil
+      end
+    end
+  end
+
+  newproperty(:bond_xmit_hash_policy) do
+    desc 'This policy uses upper layer protocol information, when available, to generate the hash.'
+
+    newvalues('layer2', 'layer3+4')
+    defaultto do
+      if /\Abond\d+\Z/ =~ resource[:name]
+        'layer3+4'
+      else
+        nil
+      end
+    end
+  end
+
+  ##
+  ## Vlan
+  ##
   newproperty(:vlanid) do
     desc 'Vlan ID.'
 
-    defaultto {
-      begin
-        if resource[:name].include?('.')
-          Integer(resource[:name].split('.').last)
-        elsif resource[:name].include?('vlan')
-          Integer(resource[:name].sub(/\Avlan/, ''))
-        else
-          nil
-        end
-      rescue
+    defaultto do
+      if /\Avlan(\d+)\Z/ =~ resource[:name]
+        Integer($1)
+      else
         nil
       end
-    }
+    end
 
     validate do |value|
       type =
-          if resource[:name].include?('.') or resource[:name].include?('vlan')
-            :vlan
-          elsif resource[:name].include?('bond')
-            :bond
-          else
-            :eth
-          end
+      case resource[:name]
+      when /\Alo\Z/
+        :loopback
+      when /\Abond\d+?\Z/
+        :bonding
+      when /\Avlan\d+\Z/
+        :vlan
+      when /\A[[:alpha:]]*([[:alpha:]]\d+)+\Z/
+        :ethernet
+      else
+        :unknown
+      end
 
       fail 'Invalid value \'%{value}\'. This interface type does not support tagging.' % { value: value } unless type == :vlan
       fail 'Invalid value \'%{value}\'. Valid value is an Integer.' % { value: value } unless value.is_a?(Integer)
@@ -218,7 +232,7 @@ Puppet::Type.newtype(:network_interface) do
   autorequire(:network_interface) do
     reqs = []
 
-    reqs += self[:bond_slaves] if self[:type] == :bond
+    reqs += self[:bond_slaves] if self[:type] == :bonding
     reqs << self[:parent] if self[:parent]
 
     reqs
