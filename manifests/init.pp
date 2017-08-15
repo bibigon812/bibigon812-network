@@ -117,11 +117,11 @@ class network (
         default => $prefix_metric_array[1],
       }
 
-      if $value[1]['device'] {
+      if $value[1]['dev'] {
         {
-          $value[1]['device'] => {
+          $value[1]['dev'] => {
             routes => concat(
-              $route_devices.dig44([$value[1]['device'], 'routes'], []),
+              $route_devices.dig44([$value[1]['dev'], 'routes'], []),
               merge($value[1], { prefix => $prefix, metric => $metric })
             )
           }
