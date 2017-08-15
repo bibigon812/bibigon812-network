@@ -4,10 +4,10 @@
 <% @routes.each do |route|  -%>
 <% unless route['ensure'] == 'absent' -%>
 <%= route['prefix'] -%>
-<% unless route['nexthop'].nil? -%>
- via <%= route['nexthop'] -%>
+<% unless route['via'].nil? -%>
+ via <%= route['via'] -%>
 <% end -%>
- dev <%= route['device'] -%>
+ dev <%= route['dev'] -%>
 <% unless route['metric'].nil? -%>
  metric <%= route['metric'] -%>
 <% end %>
