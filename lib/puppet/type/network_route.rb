@@ -63,8 +63,8 @@ Puppet::Type.newtype(:network_route) do
   end
 
   autorequire(:network_interface) do
-    if self[:device]
-      [self[:device]]
+    if self[:dev]
+      [self[:dev]]
     else
       []
     end
