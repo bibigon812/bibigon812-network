@@ -127,7 +127,7 @@ EOS
     it 'should return the resource bond0' do
       expect(described_class.instances[4].instance_variable_get('@property_hash')).to eq(
         {
-            bond_lacp_rate:        'slow',
+            bond_lacp_rate:        :slow,
             bond_miimon:           100,
             bond_mode:             '802.3ad',
             bond_slaves:           [],
