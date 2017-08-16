@@ -1,12 +1,22 @@
+## [1.1.1] - 2017-08-16
+
+### Fixed
+
+- changing the parent of a network interface
+
+### Updated
+
+- the changelog
+
 ## [1.1.0] - 2017-08-16
 
 ### Changed
 
-- all IP address are stored in a file, ex. `ifcfg-eth0`.
+- all IP address are stored in a file, ex. `ifcfg-eth0`
 
 ### Removed
 
-- the template for interface aliases.
+- the template for interface aliases
 
 ## [1.0.2] - 2017-08-09
 
