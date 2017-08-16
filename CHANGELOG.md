@@ -1,3 +1,9 @@
+## [1.1.2] -2017-08-16
+
+### Fixed
+
+- the instantiation of the network_interface resource
+
 ## [1.1.1] - 2017-08-16
 
 ### Fixed
