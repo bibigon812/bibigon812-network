@@ -38,11 +38,12 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
 
     ip('address').split(/\n/).collect do |line|
       # Find a new interface
-      if /\A\d+:\s(\S+):\s<(?:NO-CARRIER)?,?(?:LOOPBACK)?,?(?:BROADCAST)?,?(?:MULTICAST)?,?(?:SLAVE)?,?(?:NOARP)?,?(?:MASTER)?,?(UP)?,?(?:LOWER_UP)?>\smtu\s(\d+)/ =~ line
-        name_and_parent = $1
-        state = parse_state($2)
-        mtu = Integer($3)
-
+      if /\A(\d)+:\s(\S+):\s<([A-Z\-_,]+)?>\smtu\s(\d+)/ =~ line
+        index = $1
+        name_and_parent = $2
+        flags = $3.split(',')
+        mtu = Integer($4)
+        state = get_state(flags)
 
         name, parent = name_and_parent.split('@')
 
@@ -189,12 +190,11 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
 
-  def self.parse_state(value)
-    case value
-      when 'UP'
-        :up
-      else
-        :down
+  def self.get_state(flags)
+    if flags.include?('UP')
+      :up
+    else
+      :down
     end
   end
 
