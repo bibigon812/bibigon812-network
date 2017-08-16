@@ -2,28 +2,21 @@
 
 [![Build Status](https://travis-ci.org/bibigon812/bibigon812-network.svg?branch=master)](https://travis-ci.org/bibigon812/bibigon812-network)
 
-#### Table of Contents
-
-1. [Description](#description)
-1. [Setup - The basics of getting started with network](#setup)
-    * [Limitations](#limitations)
-    * [What network affects](#what-network-affects)
-    * [Beginning with network](#beginning-with-network)
-1. [Usage - Configuration options and additional functionality](#usage)
-1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-
 ## Description
 
-This module manages network interfaces without restarting the network 
+This module manages network interfaces without restarting the network
 subsystem. It contains of two parts. One uses iproute2 tools and system files
 placed in `/sys/class/net`. The other manages files needed to restore the state
 after OS boots.
 
+## Naming convention
+
+* Bonding: `bond0`, `bond1`, etc.
+* Vlan: `vlan10`, `vlan20`, `vlan4000`, etc.
+* Loopback: `lo`.
+* Ethernet: `eth0`, `ens3f0`, `enp0s1`, etc.
+
 ## Setup
-
-### Limitations
-
-* Manages alias files only for ten ip addresses.
 
 ### What network affects
 
