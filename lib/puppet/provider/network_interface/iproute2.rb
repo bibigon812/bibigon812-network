@@ -322,7 +322,12 @@ Puppet::Type.type(:network_interface).provide(:iproute2) do
   end
 
   def parent=(value)
-    @property_hash[:parent] = value
+    if parent == :absent
+      @property_hash[:parent] = value
+    else
+      destroy
+      create
+    end
   end
 
   def state
