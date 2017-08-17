@@ -39,7 +39,7 @@ Puppet::Type.type(:network_route).provide(:iproute2) do
             ensure:   :present,
             metric:   metric,
             name:     "#{prefix} #{metric}",
-            prefix:   $1,
+            prefix:   prefix,
             provider: self.name,
         }
         hash[:device] = $3 unless $3.nil?
