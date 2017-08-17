@@ -8,7 +8,7 @@ Puppet::Type.newtype(:network_route) do
 
   newparam(:name, namevar: true) do
     desc 'IP address/prefix and metric optional.'
-    newvalues(/\A\S+(?:\s+\d+\Z)?/)
+    newvalues(/\A\S+(?:\s+\d+\Z)?\Z/)
 
     munge do |value|
       value.gsub(/\s+/, ' ')
@@ -23,9 +23,9 @@ Puppet::Type.newtype(:network_route) do
       begin
         IPAddr.new value
       rescue
-        fail 'Invalid value \'%{value}\'. It is not a IP address.' % { value: value }
+        fail 'Invalid value \'%{value}\'. It is not a IP address.' % {value: value}
       end
-      fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value } unless value.include?('/')
+      fail 'Invalid value \'%{value}\'. Prefix length is not specified.' % {value: value} unless value.include?('/')
     end
   end
 
@@ -37,7 +37,7 @@ Puppet::Type.newtype(:network_route) do
     validate do |value|
       super(value)
       v = Integer(value)
-      fail 'Invalid value \'%{value}\'. Valid values are 0-255.' % { value: v } unless v >= 0 and v <= 255
+      fail 'Invalid value \'%{value}\'. Valid values are 0-255.' % {value: v} unless v >= 0 and v <= 255
     end
 
     munge do |value|
@@ -64,6 +64,10 @@ Puppet::Type.newtype(:network_route) do
   end
 
   autorequire(:network_interface) do
-    [self[:device]] if self[:device]
+    if self[:device]
+      [self[:device]]
+    else
+      []
+    end
   end
 end
