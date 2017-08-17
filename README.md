@@ -41,151 +41,160 @@ network::network_manager::ensure: stopped
 ```yaml
 ---
 network::interfaces:
-    eth0:
-        mtu: 9000
-    eth1:
-        mtu: 9000
-    bond0:
-        bond_slaves:
-            - eth0
-            - eth1
-        mtu: 9000
-    valn100:
-        ipaddress:
-            - 10.0.0.1/24
-            - 172.16.0.1/24
-        mtu: 1500
-        parent: bond0
-    vlan110:
-        ipaddress:
-            - 192.168.255.1/24
-        mtu: 9000
-        parent: bond0
+  eth0:
+    mtu: 9000
+  eth1:
+    mtu: 9000
+  bond0:
+    bond_slaves:
+      - eth0
+      - eth1
+    mtu: 9000
+  valn100:
+    ipaddress:
+      - 10.0.0.1/24
+      - 172.16.0.1/24
+    mtu: 1500
+    parent: bond0
+  vlan110:
+    ipaddress:
+      - 192.168.255.1/24
+    mtu: 9000
+    parent: bond0
 ---
 network::routes:
-    192.168.0.0/24:
-        device: vlan100
-        nexthop: 172.16.0.100
-    192.168.0.0/24 100:
-        device: vlan110
-        nexthop: 192.168.255.100
+  192.168.0.0/24:
+    device: vlan100
+    nexthop: 172.16.0.100
+  192.168.0.0/24 100:
+    device: vlan110
+    nexthop: 192.168.255.100
 ```
 
 ## Usage
 
 ```puppet
 network_interface { ['eth0', 'eth1']:
-    mtu => 9000,
+  mtu => 9000,
 }
 ```
 
 ```yaml
 ---
 network::interfaces:
-    eth0:
-        mtu: 9000
-    eth1:
-        mtu: 9000
+  eth0:
+    mtu: 9000
+  eth1:
+    mtu: 9000
 ```
 
 ### Create the bond interface
 ```puppet
 network_interface { 'bond0':
-    ensure         => present,
-    bond_lacp_rate => 'fast',
-    bond_slaves    => [
-        'eth0',
-        'eth1',
-    ],
-    mtu            => 9000,
+  ensure         => present,
+  bond_lacp_rate => 'fast',
+  bond_slaves    => [
+    'eth0',
+    'eth1',
+  ],
+  mtu            => 9000,
 }
 ```
 
 ```yaml
 ---
 network::interfaces:
-    bond0:
-        ensure: present
-        bond_lacp_rate: fast
-        bond_slaves:
-            - eth0
-            - eth1
-        mtu: 9000
+  bond0:
+    ensure: present
+    bond_lacp_rate: fast
+    bond_slaves:
+      - eth0
+      - eth1
+    mtu: 9000
 ```
 
 ### Create the vlan interface
 ```puppet
 network_interface { 'bond0.100':
-    ensure    => present,
-    ipaddress => [
-        '10.0.0.1/24',
-        '172.16.0.1/24',
-    ],
+  ensure    => present,
+  ipaddress => [
+    '10.0.0.1/24',
+    '172.16.0.1/24',
+  ],
 }
 ```
 
 ```yaml
 ---
 network::interfaces:
-    bond0.100:
-        ipaddress:
-            - 10.0.0.1/24
-            - 172.16.0.1/24
+  bond0.100:
+    ipaddress:
+      - 10.0.0.1/24
+      - 172.16.0.1/24
 ```
 
 
 ```puppet
 network_interface { 'vlan100':
-    ensure    => present,
-    ipaddress => [
-        '10.0.0.1/24',
-        '172.16.0.1/24',
-    ],
-    parent    => 'bond0',
+  ensure    => present,
+  ipaddress => [
+    '10.0.0.1/24',
+    '172.16.0.1/24',
+  ],
+  parent    => 'bond0',
 }
 ```
 
 ```yaml
 ---
 network::interfaces:
-    vlan100:
-        ipaddress:
-            - 10.0.0.1/24
-            - 172.16.0.1/24
-        parent: bond0
+  vlan100:
+    ipaddress:
+      - 10.0.0.1/24
+      - 172.16.0.1/24
+    parent: bond0
 ```
 
 ### Create routes
 
 ```puppet
 network_route { '192.168.0.0/24':
-    ensure  => present,
-    device  => 'vlan100',
-    nexthop => '10.0.0.100',
+  ensure  => present,
+  device  => 'vlan100',
+  nexthop => '10.0.0.100',
 }
 ```
 
 ```yaml
 network::routes:
-    192.168.0.0/24:
-        ensure: present
-        device: vlan100
-        nexthop: 10.0.0.100
+  192.168.0.0/24:
+    ensure: present
+    device: vlan100
+    nexthop: 10.0.0.100
 ```
 
 ```puppet
 network_route { '10.0.0.0/24 250':
-    ensure  => present,
-    device  => 'vlan200',
+  ensure => present,
+  device => 'vlan200',
 }
 ```
 
 ```yaml
 network::route:
-    10.0.0.0/24 250:
-        ensure: present
-        device: vlan200
+  10.0.0.0/24 250:
+    ensure: present
+    device: vlan200
 ```
+
+### Create the default route
+
+```puppet
+network_route { '0.0.0.0/0':
+  ensure  => present,
+  device  => 'eth0',
+  nexthop => '192.168.1.1',
+}
 
 ## Reference
 
